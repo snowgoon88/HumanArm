@@ -3,6 +3,7 @@
  */
 package example;
 
+import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.event.WindowAdapter;
@@ -18,6 +19,7 @@ import model.CompleteArm;
 
 import utils.JamaU;
 import viewer.JArm2D;
+import viewer.JArmLabel;
 
 /**
  * @author alain.dutech@loria.fr
@@ -31,6 +33,7 @@ public class ArmGraphic {
 	CompleteArm _arm = new CompleteArm();
 	/** Pour l'afficher */
 	JArm2D _jArm;
+	JArmLabel _jInfo;
 	
 	public ArmGraphic() {
 		// Setup in resting position
@@ -44,9 +47,12 @@ public class ArmGraphic {
 				System.exit(0);
 			}
 		});
+		_frame.setLayout(new BorderLayout());
 		
 		_jArm = new JArm2D(_arm.getArm());
-		_frame.add(_jArm);
+		_frame.add(_jArm, BorderLayout.CENTER);
+		_jInfo = new JArmLabel(_arm.getArm());
+		_frame.add(_jInfo, BorderLayout.SOUTH);
 		
 		_frame.setVisible(true);
 	}
@@ -59,7 +65,8 @@ public class ArmGraphic {
 			Matrix ang = _arm.getArm().getArmPos();
 			ang.plusEquals(inc);
 			_arm.setup(ang.get(0,0), ang.get(0, 1));
-			_jArm.repaint();
+//			_jArm.repaint();
+//			_jInfo.modelChanged();
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {

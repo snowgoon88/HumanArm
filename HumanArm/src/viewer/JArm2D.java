@@ -13,6 +13,7 @@ import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
 import model.Arm;
+import model.ArmModelListener;
 
 /**
  * Dessine le bras comme une suite de segments bleus.
@@ -25,7 +26,7 @@ import model.Arm;
  *
  */
 @SuppressWarnings("serial")
-public class JArm2D extends JPanel {
+public class JArm2D extends JPanel implements ArmModelListener {
 	
 	/** Bounds of the model_canvas */
 	double _minX = -1.0, _maxX = 1.0;
@@ -40,16 +41,21 @@ public class JArm2D extends JPanel {
 	public JArm2D( Arm model ) {
 		super();
 		_arm = model;
+		_arm.addArmModelListener(this);
 	}
 	public JArm2D( Arm model, double minX, double maxX, double minY, double maxY ) {
 		super();
 		_arm = model;
+		_arm.addArmModelListener(this);
 		_minX = minX;
 		_maxX = maxX;
 		_minY = minY;
 		_maxY = maxY;
 	}
-	
+	@Override
+	public void armModelChanged(Arm model) {
+		this.repaint();
+	}
 	
 	@Override
 	public void paintComponent(Graphics g) {
