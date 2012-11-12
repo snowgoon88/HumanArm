@@ -30,7 +30,7 @@ import utils.JamaU;
  * 
  * @author Alain.Dutech@loria.fr
  */
-public class Arm {
+public class Arm extends Model<ArmModelListener> {
 	
 	/** Dimension of the state space */
 	static int _dimQ = 2;
@@ -91,8 +91,6 @@ public class Arm {
 		}
 		updateEuclidianPosition();
 		
-		// Listeners
-		_listeners = new ArrayList<ArmModelListener>();
 	}
 	
 	private void updateEuclidianPosition() {
@@ -193,7 +191,7 @@ public class Arm {
 		// then update euclidian position
 		updateEuclidianPosition();
 		update2DPosition();
-		notifyArmModelListeners();
+		notifyModelListeners();
 	}
 
 	/**
@@ -245,7 +243,7 @@ public class Arm {
 			this._q = q;
 			updateEuclidianPosition();
 			update2DPosition();
-			notifyArmModelListeners();
+			notifyModelListeners();
 		}
 	}
 	/**
@@ -257,7 +255,7 @@ public class Arm {
 			this._q = new Matrix(vecq, 1);
 			updateEuclidianPosition();
 			update2DPosition();
-			notifyArmModelListeners();
+			notifyModelListeners();
 		}
 	}
 
@@ -276,7 +274,7 @@ public class Arm {
 		if( dq.getColumnDimension() == _dq.getColumnDimension() && 
 				dq.getRowDimension() == _dq.getRowDimension()) {
 			this._dq = dq;
-			notifyArmModelListeners();
+			notifyModelListeners();
 		}
 	}
 	/**
@@ -286,7 +284,7 @@ public class Arm {
 	public void setArmSpeed(double[] vecdq) {
 		if (vecdq.length == _q.getColumnDimension()) {
 			this._dq = new Matrix(vecdq, 1);
-			notifyArmModelListeners();
+			notifyModelListeners();
 		}
 	}
 
@@ -332,41 +330,5 @@ public class Arm {
 	 */
 	public double getArmEndPointY() {
 		return _posY[_posY.length-1];
-	}
-	
-	/** An array of Listeners */
-	private final ArrayList<ArmModelListener> _listeners;
-	/**
-	 * Add a Listener if not existing and notify it.
-	 */
-	public void addArmModelListener (final ArmModelListener listener)
-	{
-		if (! this._listeners.contains(listener)) {
-			this._listeners.add(listener);
-			notifyArmModelListener(listener);
-		}
-	}
-	/**
-	 * Remove Listener
-	 */
-	public void removeArmModelListener	(final ArmModelListener listener)
-	{
-		this._listeners.remove(listener);
-	}
-	/**
-	 * Notify all Listeners
-	 */
-	public void notifyArmModelListeners ()
-	{
-		for (ArmModelListener listener : this._listeners) {
-			notifyArmModelListener (listener);
-		}
-	}
-	/** 
-	 * Notify given Listener.
-	 */
-	public void notifyArmModelListener(ArmModelListener listener)
-	{
-		listener.armModelChanged (this);
 	}
 }

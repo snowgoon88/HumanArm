@@ -26,7 +26,6 @@ public class JArmLabel extends JLabel implements ArmModelListener {
 	public JArmLabel(Arm model) {
 		super();
 		_arm = model;
-		_arm.addArmModelListener(this);
 		setText(getDisplayString());
 	}
 
@@ -42,7 +41,7 @@ public class JArmLabel extends JLabel implements ArmModelListener {
 	}
 
 	@Override
-	public void armModelChanged(Arm model) {
+	public void modelChanged(Arm model) {
 		setText(getDisplayString());
 	}
 }

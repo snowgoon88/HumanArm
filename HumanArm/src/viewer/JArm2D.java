@@ -41,19 +41,17 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	public JArm2D( Arm model ) {
 		super();
 		_arm = model;
-		_arm.addArmModelListener(this);
 	}
 	public JArm2D( Arm model, double minX, double maxX, double minY, double maxY ) {
 		super();
 		_arm = model;
-		_arm.addArmModelListener(this);
 		_minX = minX;
 		_maxX = maxX;
 		_minY = minY;
 		_maxY = maxY;
 	}
 	@Override
-	public void armModelChanged(Arm model) {
+	public void modelChanged(Arm model) {
 		this.repaint();
 	}
 	

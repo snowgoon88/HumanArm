@@ -8,7 +8,5 @@ package model;
  * 
  * @author alain.dutech@loria.fr
  */
-public interface ArmModelListener {
-
-	void armModelChanged(Arm model); 
+public interface ArmModelListener extends ModelListener<Arm> {
 }
