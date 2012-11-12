@@ -15,11 +15,17 @@ import javax.swing.JPanel;
 import model.Arm;
 
 /**
+ * Dessine le bras comme une suite de segments bleus.
+ * Les axes sont aussi dessiné entre -1 et 1.
+ * 
+ * TODO Garder posX et posY ou passer aux Point3d ?
+ * TODO Tenter MVC ?
+ * 
  * @author alain.dutech@loria.fr
  *
  */
 @SuppressWarnings("serial")
-public class JArm extends JPanel {
+public class JArm2D extends JPanel {
 	
 	/** Bounds of the model_canvas */
 	double _minX = -1.0, _maxX = 1.0;
@@ -31,11 +37,11 @@ public class JArm extends JPanel {
 	/** Model : HumanArm */
 	Arm _arm;
 	
-	public JArm( Arm model ) {
+	public JArm2D( Arm model ) {
 		super();
 		_arm = model;
 	}
-	public JArm( Arm model, double minX, double maxX, double minY, double maxY ) {
+	public JArm2D( Arm model, double minX, double maxX, double minY, double maxY ) {
 		super();
 		_arm = model;
 		_minX = minX;
@@ -43,7 +49,8 @@ public class JArm extends JPanel {
 		_minY = minY;
 		_maxY = maxY;
 	}
-
+	
+	
 	@Override
 	public void paintComponent(Graphics g) {
         super.paintComponent(g);       
