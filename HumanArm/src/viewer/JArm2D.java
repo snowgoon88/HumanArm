@@ -3,14 +3,27 @@
  */
 package viewer;
 
+import info.monitorenter.util.collections.RingBufferArrayFast;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import model.Arm;
 import model.ArmModelListener;
@@ -37,14 +50,24 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	
 	/** Model : HumanArm */
 	Arm _arm;
+	/** Memory of end points */
+	RingBufferArrayFast<Double> _endX, _endY;
+	/** Display Memory */
+	boolean _fg_memory = true;
+	
 	
 	public JArm2D( Arm model ) {
 		super();
 		_arm = model;
+		_endX = new RingBufferArrayFast<Double>(100);
+		_endY = new RingBufferArrayFast<Double>(100);
 	}
 	public JArm2D( Arm model, double minX, double maxX, double minY, double maxY ) {
 		super();
 		_arm = model;
+		_endX = new RingBufferArrayFast<Double>(100);
+		_endY = new RingBufferArrayFast<Double>(100);
+		
 		_minX = minX;
 		_maxX = maxX;
 		_minY = minY;
@@ -80,6 +103,28 @@ public class JArm2D extends JPanel implements ArmModelListener {
 		for (int i = 1; i < posX.length; i++) {
 			g.drawLine(xWin(posX[i-1]),yWin(posY[i-1]), xWin(posX[i]), yWin(posY[i]) );
 		}
+		
+		// Add end point to memory
+		addEndPoint(posX[posX.length-1], posY[posY.length-1]);
+		
+		// draw trajectory
+		if (_fg_memory) drawMemory(g2);
+	}
+	private void drawMemory(Graphics2D g2) {
+		if (_endX.size() > 1 ) {
+			g2.setStroke(new BasicStroke(1));
+			g2.setColor(Color.magenta);
+			double srcX = _endX.getOldest();
+			double srcY = _endY.getOldest();
+			Iterator<Double> iY = _endY.iterator();
+			for (Iterator<Double> iX = _endX.iterator(); iX.hasNext();) {
+				Double x = (double) iX.next();
+				Double y = (double) iY.next();
+				g2.drawLine(xWin(srcX),yWin(srcY), xWin(x),yWin(y));
+				srcX = x;
+				srcY = y;
+			}	
+		}
 	}
 	
 	/**
@@ -95,5 +140,79 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	 */
 	private int yWin( double y) {
 		return (int) (_size.height - (y - _minY)/(_maxY-_minY) * _size.height);
+	}
+	
+	/**
+	 * Get the size of the memory trajectory drawn
+	 * @return _memSize
+	 */
+	public int getMemorySize() {
+		return _endX.getBufferSize();
+	}
+	/**
+	 * Set the size of the memory trajectory drawn
+	 */
+	public void setMemorySize(int size ) {
+		_endX.setBufferSize(size);
+		_endY.setBufferSize(size);
+	}
+	
+	/**
+	 * Is the Memory drawn on JPanel
+	 * @return the _fg_memory
+	 */
+	public boolean isMemoryDrawn() {
+		return _fg_memory;
+	}
+	/**
+	 * Decide if Memory is drawn on JPanel
+	 */
+	public void setMemoryDrawn(boolean drawMemory) {
+		this._fg_memory = drawMemory;
+	}
+	private void addEndPoint( double x, double y) {
+		_endX.add(x);
+		_endY.add(y);
+	}
+	
+	public JPanel getControlPanel() {
+		return new JArmControl();
+	}
+	/**
+	 * JPanel in order to control the JArm panel.
+	 */
+	class JArmControl extends JPanel {
+		public JArmControl() {
+			// JCheckBox for drawing Memory
+			JCheckBox memCheck = new JCheckBox("Mémoire");
+			memCheck.setSelected(isMemoryDrawn());
+			memCheck.addItemListener(
+					new ItemListener() {
+						@Override
+						public void itemStateChanged(ItemEvent e) {
+							if (e.getStateChange() == ItemEvent.SELECTED) {
+								setMemoryDrawn(true);
+							}
+							else {
+								setMemoryDrawn(false);
+							}
+						}
+					});
+			add(memCheck);
+			
+			// JSlider for Memory size
+			JLabel memSizeLabel = new JLabel("Taille:");
+			add(memSizeLabel);
+			final SpinnerNumberModel memSizeModel = new SpinnerNumberModel(getMemorySize(), 2, 10000, 20);
+			JSpinner memSpin = new JSpinner(memSizeModel);
+			memSpin.addChangeListener(
+					new ChangeListener() {
+						@Override
+						public void stateChanged(ChangeEvent e) {
+							setMemorySize(memSizeModel.getNumber().intValue());
+						}
+					});
+			add(memSpin);
+		}
 	}
 }

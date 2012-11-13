@@ -50,9 +50,11 @@ public class ArmGraphic {
 		_frame.setLayout(new BorderLayout());
 		
 		_jArm = new JArm2D(_arm.getArm());
+		System.out.println("MemSize="+_jArm.getMemorySize());
 		_frame.add(_jArm, BorderLayout.CENTER);
+		_frame.add(_jArm.getControlPanel(), BorderLayout.SOUTH);
 		_jInfo = new JArmLabel(_arm.getArm());
-		_frame.add(_jInfo, BorderLayout.SOUTH);
+		_frame.add(_jInfo, BorderLayout.NORTH);
 		
 		_arm.getArm().addModelListener(_jArm);
 		_arm.getArm().addModelListener(_jInfo);
