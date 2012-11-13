@@ -1,0 +1,7 @@
+# What to ignore
+bin/
+*.zip
+*.jar
+*.data
+pyarm*
+
