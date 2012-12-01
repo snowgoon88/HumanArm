@@ -12,7 +12,7 @@ import java.util.ListIterator;
  * @author Alain.Dutech@loria.fr
  *
  */
-public class CommandSequence {
+public class CommandSequence implements Iterable<Command> {
 	
 	/** List of Commands */
 	LinkedList<Command> _commands;
@@ -128,6 +128,7 @@ public class CommandSequence {
 		return _commands.contains( obj );
 	}
 	
+	@Override
 	public Iterator<Command> iterator() {
 		return _commands.iterator();
 	}
@@ -159,5 +160,4 @@ public class CommandSequence {
 		str += "\n  Current "+_next;
 		return str;
 	}
-
 }

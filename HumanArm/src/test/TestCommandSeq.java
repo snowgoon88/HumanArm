@@ -3,6 +3,14 @@
  */
 package test;
 
+import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
+
+import viewer.JCommandSequence;
+
 import model.Command;
 import model.CommandSequence;
 
@@ -174,6 +182,30 @@ public class TestCommandSeq {
 		System.out.println("FDelta = "+(System.currentTimeMillis() - m_starttime));
 	}
 	
+	public void testGraphic() {
+		// Setup window
+		JFrame frame = new JFrame("Arm - Java2D API");
+		frame.setSize(600,600);
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		frame.setLayout(new BorderLayout());
+		
+		CommandSequence com = new CommandSequence();		
+		com.add(new Command(1.0, 0.8));
+		com.add(new Command(0.0, 0.0));
+		com.add(new Command(0.3, 0.3));
+		com.add(new Command(2.0, 0.1));
+		
+		// Graphical part
+		JCommandSequence seqViewer = new JCommandSequence(com);
+		frame.add( seqViewer, BorderLayout.CENTER);
+		
+		frame.setVisible(true);
+	}
+	
 	/**
 	 * @param args
 	 */
@@ -181,7 +213,8 @@ public class TestCommandSeq {
 		TestCommandSeq app = new TestCommandSeq();
 		//app.testCreate();
 		//app.testAddFocus();
-		app.testSpeed();
+		//app.testSpeed();
+		app.testGraphic();
 	}
 
 }
