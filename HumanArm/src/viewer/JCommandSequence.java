@@ -34,6 +34,10 @@ public class JCommandSequence extends JPanel {
 	ITrace2D _trace;
 	/** The model (ie: sequence of Commands) */
 	CommandSequence _comSeq;
+	/** The selected Command */
+	Command _selected;
+	/** To change Command more precisely */
+	JCommand _comPanel;
 	
 	/**
 	 * 
@@ -41,13 +45,15 @@ public class JCommandSequence extends JPanel {
 	public JCommandSequence( CommandSequence model) {
 		super();
 		_comSeq = model;
-		build();
+		_selected = null;
+		
+		buildGUI();
 	}
 
 	/**
 	 * Build Chart2D and Trace2D. Fill Trace2D with points.
 	 */
-	private void build() {
+	private void buildGUI() {
 		// Set Layout
 		this.setLayout(new BorderLayout());
 		// Build Chart
@@ -71,12 +77,16 @@ public class JCommandSequence extends JPanel {
 		}
 		_trace.addPoint(last.time+1.0,last.val);
 		_trace.setVisible(true);
+		
+		_comPanel = new JCommand(null, _comSeq);
+		this.add(_comPanel, BorderLayout.SOUTH);
 	}
 
 	/**
 	 * Permet de modifier une CommandSequence avec la souris.
 	 * - pressed : sélectionne un segment -> une Command
 	 * - dragged : modifie la valeur d'un segment -> une Command
+	 * - released : nouvelle valeur transmise à Command
 	 */
 	class MyMouseListener implements MouseListener, MouseMotionListener {
 		/** Start of selected Command */
@@ -87,6 +97,8 @@ public class JCommandSequence extends JPanel {
 		int _mouseY;
 		/** Memory of y position ot selected points */
 		double _yBase = 0;
+		/** Need to update model ? */
+		boolean _fg_needUpdate = false;
 		
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -100,11 +112,14 @@ public class JCommandSequence extends JPanel {
 				_ptBegin.removeAllAdditionalPointPainters();
 				_ptEnd.removeAllAdditionalPointPainters();
 			}
+			_fg_needUpdate = false;
 			
 			// Memorize Mouse y-position
 			_mouseY = e.getY();
 			
 			ITracePoint2D ptPressed = _chart.getNearestPointEuclid(e);
+			// Could get original trace : ITrace2D tr = ptPressed.getListener();
+			//                            if (tr==_trace) System.out.println("Same TRACE");
 			// Memorize Val of selected Points
 			_yBase = ptPressed.getY();
 			
@@ -142,11 +157,22 @@ public class JCommandSequence extends JPanel {
 			// highlight the 2 points
 			_ptBegin.addAdditionalPointPainter(new PointPainterDisc());
 			_ptEnd.addAdditionalPointPainter(new PointPainterDisc());
+			
+			// Find Command
+			_selected = _comSeq.finds(_ptBegin.getX(), _ptBegin.getY());
+			if (_selected != null) {
+				System.out.println("Found "+_selected.toStringP());
+			}
+			
+			// Alert the JCommand
+			_comPanel.setCommand(_selected);
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
+			if (_fg_needUpdate) {
+				_selected.val = _ptBegin.getY();
+			}
 		}
 
 		@Override
@@ -170,6 +196,8 @@ public class JCommandSequence extends JPanel {
 			
 			_ptBegin.setLocation(_ptBegin.getX(), _yBase-deltaY);
 			_ptEnd.setLocation(_ptEnd.getX(), _yBase-deltaY);
+			
+			_fg_needUpdate = true;
 		}
 		
 		@Override

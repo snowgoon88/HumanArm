@@ -127,6 +127,19 @@ public class CommandSequence implements Iterable<Command> {
 	public boolean contains(Command obj) {
 		return _commands.contains( obj );
 	}
+	/** 
+	 * Cherche un Command donné par (time,val).
+	 * Retourne null si pas trouvé.
+	 * @return Command trouvé ou null
+	 */
+	public Command finds(double time, double val) {
+		for (Command com : _commands) {
+			if (com.time == time && com.val == val) {
+				return com;
+			}
+		}
+		return null;
+	}
 	
 	@Override
 	public Iterator<Command> iterator() {
@@ -146,6 +159,16 @@ public class CommandSequence implements Iterable<Command> {
 		_next = null;
 		_it_com = null;
 		return res;
+	}
+	public void changeCommand(Command obj, double time, double val ) {
+		System.out.println("Changing "+obj.toString());
+		obj.time = time;
+		obj.val = val;
+		Collections.sort(_commands);
+		_next = null;
+		_it_com = null;
+		
+		System.out.println(this.toString());
 	}
 	
 	public void clear() {
