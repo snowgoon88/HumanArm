@@ -6,6 +6,7 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
@@ -207,6 +208,34 @@ public class TestCommandSeq {
 		frame.setVisible(true);
 	}
 	
+	public void testWrite() {
+		CommandSequence com = new CommandSequence();		
+		com.add(new Command(1.1, 0.8));
+		com.add(new Command(0.1, 0.0));
+		com.add(new Command(0.33, 0.3));
+		com.add(new Command(2.2, 0.1));
+		
+		try {
+			com.write("essai_command.data");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void testRead() {
+		CommandSequence com = new CommandSequence();
+		
+		try {
+			com.read("essai_command.data");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println(com.toString());
+	}
+	
 	/**
 	 * @param args
 	 */
@@ -215,7 +244,9 @@ public class TestCommandSeq {
 		//app.testCreate();
 		//app.testAddFocus();
 		//app.testSpeed();
-		app.testGraphic();
+		//app.testGraphic();
+		//app.testWrite();
+		app.testRead();
 	}
 
 }

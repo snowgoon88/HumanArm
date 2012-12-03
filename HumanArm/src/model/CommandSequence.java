@@ -3,10 +3,17 @@
  */
 package model;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.StringTokenizer;
 
 /**
  * @author Alain.Dutech@loria.fr
@@ -186,5 +193,63 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 		String str = "CommandSequence=" + _commands;
 		str += "\n  Current "+_next;
 		return str;
+	}
+	
+	/**
+	 * Ecrit une CommandSequence dans un fichier.
+	 * @param fileName Nom du fichier.
+	 * @throws IOException
+	 */
+	public void write(String fileName) throws IOException {
+		// open a file
+		FileWriter myFile = new FileWriter( fileName );
+        BufferedWriter myWriter = new BufferedWriter( myFile );
+        
+        myWriter.write( "# CommandSequence : 1 Command (time,val) by line");
+        myWriter.newLine();
+        
+        for (Command com : _commands) {
+			myWriter.write(Double.toString(com.time)+"\t"+Double.toString(com.val));
+			myWriter.newLine();
+		}
+        
+        myWriter.close();
+        myFile.close();
+	}
+	
+	public void read(String fileName) throws IOException {
+		FileReader myFile = new FileReader( fileName );
+        BufferedReader myReader = new BufferedReader( myFile );
+
+        String lineRead = myReader.readLine();
+        
+        _current = null;
+		_next = null;
+		_it_com = null;
+		_commands.clear();
+        
+        while(lineRead != null) {
+        	// ignore if begins with "#"
+        	if (lineRead.startsWith("#") ==  false) {
+        		StringTokenizer st = new StringTokenizer( lineRead, " \t");
+                String token;
+
+                // should read time
+                token = st.nextToken();
+                double t = Double.parseDouble(token);
+                // then val
+                token = st.nextToken();
+                double v = Double.parseDouble(token);
+                
+                _commands.add( new Command(t,v));
+        	}
+        	lineRead = myReader.readLine();
+        }
+        
+        myReader.close();
+        myFile.close();
+        
+        Collections.sort(_commands);
+		notifyModelListeners();
 	}
 }

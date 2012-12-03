@@ -3,6 +3,8 @@
  */
 package model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 /**
@@ -42,4 +44,5 @@ public class Command implements Comparable<Command> {
 	public int compareTo(Command c) {
         return Double.compare(this.time, c.time);
 	}
+	
 }
