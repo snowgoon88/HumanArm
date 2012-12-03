@@ -201,11 +201,24 @@ public class TestCommandSeq {
 		com.add(new Command(2.0, 0.1));
 		
 		// Graphical part
-		JCommandSequence seqViewer = new JCommandSequence(com);
+		JCommandSequence seqViewer = new JCommandSequence();
+		seqViewer.add(com);
 		com.addModelListener(seqViewer);
 		frame.add( seqViewer, BorderLayout.CENTER);
 		
 		frame.setVisible(true);
+		
+		CommandSequence com2 = new CommandSequence();
+
+		try {
+			com2.read("essai_command.data");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		seqViewer.add(com2);
+		com2.addModelListener(seqViewer);
+
 	}
 	
 	public void testWrite() {
@@ -244,9 +257,9 @@ public class TestCommandSeq {
 		//app.testCreate();
 		//app.testAddFocus();
 		//app.testSpeed();
-		//app.testGraphic();
+		app.testGraphic();
 		//app.testWrite();
-		app.testRead();
+		//app.testRead();
 	}
 
 }

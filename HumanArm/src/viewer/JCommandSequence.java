@@ -10,11 +10,13 @@ import info.monitorenter.gui.chart.pointpainters.PointPainterDisc;
 import info.monitorenter.gui.chart.traces.Trace2DSimple;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.AbstractAction;
@@ -44,13 +46,19 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	/** The actual graph */
 	Chart2D _chart;
 	/** The trace of consign points */
-	ITrace2D _trace;
+	ArrayList<ITrace2D> _traces;
 	/** The model (ie: sequence of Commands) */
+	ArrayList<CommandSequence> _comList;
+	
+	/** The selected CommandSequence */
 	CommandSequence _comSeq;
 	/** The selected Command */
 	Command _selected;
 	/** To change Command more precisely */
 	JCommand _comPanel;
+	
+	/** Info Label */
+	JLabel _infoLabel;
 	
 	/** Action to add a new Command */
 	Action _addCommandAct;
@@ -59,18 +67,36 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	/** Flag that allow dragging Command */
 	boolean _fg_drag_mode = false;
 	
-	/**
-	 * 
-	 */
-	public JCommandSequence( CommandSequence model) {
+	/** Default Color */
+	Color [] _defColors = {Color.blue, Color.red, Color.green,
+			Color.cyan, Color.magenta, Color.pink, Color.black };
+	
+	public JCommandSequence() {
 		super();
-		_comSeq = model;
+		_traces = new ArrayList<ITrace2D>();
+		_comList = new ArrayList<CommandSequence>();
+		_comSeq = null;
 		_selected = null;
 		
 		buildActions();
 		buildGUI();
 		
-		_chart.setComponentPopupMenu( new PopUpChart() );
+		_chart.setComponentPopupMenu( new PopUpChart() );	
+	}
+	
+	public boolean add(CommandSequence obj) {
+		boolean res = _comList.add(obj);
+		
+		// new trace
+		ITrace2D trace = new Trace2DSimple();
+		_chart.addTrace(trace);
+		_traces.add( trace );
+		trace.setColor(_defColors[_comList.size() % _defColors.length]);
+		trace.setVisible(true);
+		
+		updateTrace(trace, obj);
+		
+		return res;
 	}
 
 	/**
@@ -85,15 +111,13 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		_chart.addMouseListener(ml);
 		_chart.addMouseMotionListener(ml);
 	
-		_trace = new Trace2DSimple();
-		_chart.addTrace(_trace);
 		this.add(_chart, BorderLayout.CENTER);
-		
-		updateTrace();
-		_trace.setVisible(true);
 		
 		// At the bottom
 		JPanel bottomPanel = new JPanel();
+		_infoLabel = new JLabel("- : ");
+		bottomPanel.add(_infoLabel);
+		
 		JButton addButton = new JButton(_addCommandAct);
 		addButton.setHideActionText(true);
 		bottomPanel.add( addButton );
@@ -107,23 +131,23 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		bottomPanel.add( _comPanel );
 		this.add(bottomPanel, BorderLayout.SOUTH);
 	}
-	private void updateTrace() {
-		_trace.removeAllPoints();
+	private void updateTrace(ITrace2D trace, CommandSequence comSeq) {
+		trace.removeAllPoints();
 
 		// Add points
 		Command last = null;
-		for (Command com : _comSeq) {
+		for (Command com : comSeq) {
 			if (last != null) {	
-				_trace.addPoint(com.time, last.val);
+				trace.addPoint(com.time, last.val);
 			}
-			_trace.addPoint(com.time, com.val);
+			trace.addPoint(com.time, com.val);
 			last = com;				
 		}
-		_trace.addPoint(last.time+1.0,last.val);
+		trace.addPoint(last.time+1.0,last.val);
 		
 		// Put Circle around selected Commands
-		if (_selected != null) {
-			for (Iterator<ITracePoint2D> it = _trace.iterator(); it.hasNext();) {
+		if (_comSeq == comSeq && _selected != null) {
+			for (Iterator<ITracePoint2D> it = trace.iterator(); it.hasNext();) {
 				ITracePoint2D pt = (ITracePoint2D) it.next();
 				
 				// Matches with selected Command
@@ -137,14 +161,15 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			}
 		}
 	}
+	
 	private void buildActions() {
 		IconLoader iconLoader = new IconLoader();
-		_addCommandAct = new AddCommandAction("Add",
+		_addCommandAct = new AddCommandAction("Add Pt",
 				iconLoader.createImageIcon("list-add.png", "Add"),
 				"Ajouter un nouveau point de consigne",
 				new Integer(KeyEvent.VK_A));
 		
-		_removeCommandAct = new RemoveCommandAction("Del",
+		_removeCommandAct = new RemoveCommandAction("Del Pt",
 				iconLoader.createImageIcon("list-remove.png", "Remove"),
 				"Effacer un point de consigne",
 				new Integer(KeyEvent.VK_X));
@@ -179,6 +204,17 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			
 			// If points where selected, deselect them
 			_selected = null;
+			if (_comSeq != null) {
+				int index = _comList.indexOf(_comSeq);
+				if (index >= 0) {
+					ITrace2D tr = _traces.get(index);
+					updateTrace(tr, _comSeq);
+				}
+				else {
+					System.err.println("[CommandSequence.MyMouseListener.mousePressed] ComSeq not found.");
+				}
+			}
+			_comSeq = null;
 			
 //			if (_ptEnd != null ) {
 //				_ptBegin.removeAllAdditionalPointPainters();
@@ -190,6 +226,7 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			_mouseY = e.getY();
 			
 			ITracePoint2D ptPressed = _chart.getNearestPointEuclid(e);
+			ITrace2D trPressed = ptPressed.getListener();
 			// Could get original trace : ITrace2D tr = ptPressed.getListener();
 			//                            if (tr==_trace) System.out.println("Same TRACE");
 			// Memorize Val of selected Points
@@ -198,44 +235,54 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			//System.out.println("Selected point at "+ptPressed.getX()+", "+ptPressed.getY());
 			
 			// Compute Start and End of segment. Command is "linked" on the Start point.
-			Iterator<ITracePoint2D> it = _trace.iterator();
-			ITracePoint2D _ptBegin = null;
+			Iterator<ITracePoint2D> it = trPressed.iterator();
+			ITracePoint2D ptBegin = null;
 			for (; it.hasNext();) {
 				ITracePoint2D pt = (ITracePoint2D) it.next();
 				if (pt == ptPressed) {
-					if (_ptBegin != null ) {
-						if (_ptBegin.getY() == pt.getY()) {
+					if (ptBegin != null ) {
+						if (ptBegin.getY() == pt.getY()) {
 							break;
 						}
 					}
 					else {
 						// ptPressed must be the first point
-						_ptBegin = pt;
+						ptBegin = pt;
 						break;
 					}
 				}
-				else if (_ptBegin == ptPressed) {
+				else if (ptBegin == ptPressed) {
 					// now we are after
 					break;
 					
 				}
-				_ptBegin = pt;
+				ptBegin = pt;
 			}
 			
 //			// highlight the 2 points
 //			_ptBegin.addAdditionalPointPainter(new PointPainterDisc());
 //			_ptEnd.addAdditionalPointPainter(new PointPainterDisc());
 			
-			// Find Command
-			_selected = _comSeq.finds(_ptBegin.getX(), _ptBegin.getY());
-			if (_selected != null) {
-				System.out.println("Found "+_selected.toStringP());
+			// Find the right CommandSequence
+			int index = _traces.indexOf(trPressed);
+			if (index >= 0) {
+				_comSeq = _comList.get(index);
+				// Find Command
+				_selected = _comSeq.finds(ptBegin.getX(), ptBegin.getY());
+				if (_selected != null) {
+					System.out.println("Found "+_selected.toStringP());
+				}
+				
+				// Alert the JCommand
+				_comPanel.setCommand(_selected, _comSeq);
+				// Info Panel
+				_infoLabel.setText("Com["+index+"]");
+				
+				updateTrace( trPressed, _comSeq);
 			}
-			
-			// Alert the JCommand
-			_comPanel.setCommand(_selected);
-			
-			updateTrace();
+			else {
+				System.err.println("[CommandSequence.MyMouseListener.mousePressed] trace not found.");
+			}
 		}
 
 		@Override
@@ -283,7 +330,15 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	@Override
 	public void modelChanged(CommandSequence model) {
 		// TODO Auto-generated method stub
-		updateTrace();
+		// find the trace
+		int index = _comList.indexOf(model);
+		if (index >= 0) {
+			ITrace2D tr = _traces.get(index);
+			updateTrace(tr, model);
+		}
+		else {
+			System.err.println("[CommandSequence.modelChanged] model not found.");
+		}
 	}
 	
 	/**
@@ -297,25 +352,30 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// potential new Command
-			Command newCommand = new Command();
-			// possible actions
-			Object[] options = {"Ajouter","Annuler"};
-			
-			// create a Panel for setting new Command fields
-			JPanel ptPanel = new JPanel();
-			JLabel txtLabel = new JLabel( "Coordonnées du point à ajouter");
-			ptPanel.add( txtLabel );
-			JCommand commandPanel = new JCommand(newCommand, _comSeq);
-			ptPanel.add( commandPanel );
-			
-			// Use a customized JOptionPane to get user's answer
-			int choice = JOptionPane.showOptionDialog(_chart, ptPanel, 
-					"Ajout Pt Consigne", JOptionPane.OK_CANCEL_OPTION,
-					JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-			System.out.println("Dialog = "+choice);
-			if (choice == 0) {
-				_comSeq.add(newCommand);
+			if (_comSeq != null ) {
+				// potential new Command
+				Command newCommand = new Command();
+				// possible actions
+				Object[] options = {"Ajouter","Annuler"};
+
+				// create a Panel for setting new Command fields
+				JPanel ptPanel = new JPanel();
+				JLabel txtLabel = new JLabel( "Coordonnées du point à ajouter");
+				ptPanel.add( txtLabel );
+				JCommand commandPanel = new JCommand(newCommand, _comSeq);
+				ptPanel.add( commandPanel );
+
+				// Use a customized JOptionPane to get user's answer
+				int choice = JOptionPane.showOptionDialog(_chart, ptPanel, 
+						"Ajout Pt Consigne", JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+				System.out.println("Dialog = "+choice);
+				if (choice == 0) {
+					_comSeq.add(newCommand);
+				}
+			}
+			else {
+				JOptionPane.showMessageDialog(_chart, "Pas de Command choisie!");
 			}
 		}
 	}
@@ -330,12 +390,15 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (_selected != null) {
+			if (_comSeq != null && _selected != null) {
 				int choice = JOptionPane.showConfirmDialog(_chart, "Effacer le point?",
 						"Effacer Pt Consigne", JOptionPane.OK_CANCEL_OPTION);
 				if (choice == 0) {
 					_comSeq.remove(_selected);
 				}
+			}
+			else {
+				JOptionPane.showMessageDialog(_chart, "Pas de Command choisie!");
 			}
 		}
 	}

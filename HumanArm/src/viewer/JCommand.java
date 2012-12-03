@@ -12,18 +12,19 @@ import javax.swing.event.ChangeListener;
 
 import model.Command;
 import model.CommandSequence;
-
+ 
 /**
  * @author alain.dutech@loria.fr
  *
  */
+@SuppressWarnings("serial")
 public class JCommand extends JPanel {
 
 	/** Linked to a Command */
 	Command _com = null;
 	/** That belongs to a CommandSequence */
 	CommandSequence _comSeq = null;
-	
+
 	/** Label for X */
 	JLabel _xLabel;
 	/** Spinner for X */
@@ -90,8 +91,9 @@ public class JCommand extends JPanel {
 		add( _ySpin );
 	}
 	
-	public void setCommand( Command com ) {
+	public void setCommand( Command com, CommandSequence comSeq) {
 		_com = com;
+		_comSeq = comSeq;
 		_xSpinModel = new SpinnerNumberModel(0.0, 0.0, 10.0, 0.1);
 		if (_com != null) {
 			_xSpinModel.setValue(_com.time);
@@ -105,7 +107,7 @@ public class JCommand extends JPanel {
 		_ySpin.setModel(_ySpinModel);
 	}
 	
-	public Command getComman() {
-		return _com;
-	}
+//	public Command getCommand() {
+//		return _com;
+//	}
 }
