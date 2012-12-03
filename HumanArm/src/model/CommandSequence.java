@@ -29,8 +29,17 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 	Command _next;
 	/** Iterator on next Command */
 	ListIterator<Command> _it_com;
+	/** Name */
+	String _name = "-";
 	
 	public CommandSequence() {
+		_commands = new LinkedList<Command>();
+		_current = null;
+		_next = null;
+		_it_com = null;
+	}
+	public CommandSequence(String name) {
+		_name = name;
 		_commands = new LinkedList<Command>();
 		_current = null;
 		_next = null;
@@ -190,7 +199,7 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 	 */
 	@Override
 	public String toString() {
-		String str = "CommandSequence=" + _commands;
+		String str = "CS["+_name+"]=" + _commands;
 		str += "\n  Current "+_next;
 		return str;
 	}
@@ -205,31 +214,75 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 		FileWriter myFile = new FileWriter( fileName );
         BufferedWriter myWriter = new BufferedWriter( myFile );
         
-        myWriter.write( "# CommandSequence : 1 Command (time,val) by line");
-        myWriter.newLine();
-        
-        for (Command com : _commands) {
-			myWriter.write(Double.toString(com.time)+"\t"+Double.toString(com.val));
-			myWriter.newLine();
-		}
+        write( myWriter );
         
         myWriter.close();
         myFile.close();
+	}
+	public void write(BufferedWriter w) throws IOException {
+		w.write( "# CommandSequence : "+_name);
+        w.newLine();
+        
+        w.write(_name);
+        w.newLine();
+        
+        w.write( Integer.toString(_commands.size()));
+        w.newLine();
+        
+        for (Command com : _commands) {
+			w.write(Double.toString(com.time)+"\t"+Double.toString(com.val));
+			w.newLine();
+		}
+        
 	}
 	
 	public void read(String fileName) throws IOException {
 		FileReader myFile = new FileReader( fileName );
         BufferedReader myReader = new BufferedReader( myFile );
-
-        String lineRead = myReader.readLine();
+        
+        read( myReader );
+        
+        myReader.close();
+        myFile.close();
+	}
+	
+	public void read( BufferedReader br) throws IOException {
+		String lineRead = br.readLine();
         
         _current = null;
 		_next = null;
 		_it_com = null;
 		_commands.clear();
         
-        while(lineRead != null) {
+		// read out name
+		while(lineRead != null) {
+			// ignore if begins with "#"
+			if (lineRead.startsWith("#") ==  false) {
+				StringTokenizer st = new StringTokenizer( lineRead, " \t");
+				String token;
+				// should read size
+				token = st.nextToken();
+				_name = token;
+				lineRead = br.readLine();
+				break;
+			}
+			lineRead = br.readLine();
+		}
+		// read out size
+		int size = -1;
+        while(lineRead != null && size < 0) {
         	// ignore if begins with "#"
+        	if (lineRead.startsWith("#") ==  false) {
+        		StringTokenizer st = new StringTokenizer( lineRead, " \t");
+                String token;
+                // should read size
+                token = st.nextToken();
+                size = Integer.parseInt(token);
+        	}
+        	lineRead = br.readLine();
+        }
+        int nbRead = 0;
+        while(lineRead != null && nbRead < size) {
         	if (lineRead.startsWith("#") ==  false) {
         		StringTokenizer st = new StringTokenizer( lineRead, " \t");
                 String token;
@@ -242,14 +295,24 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
                 double v = Double.parseDouble(token);
                 
                 _commands.add( new Command(t,v));
+                nbRead += 1;
         	}
-        	lineRead = myReader.readLine();
+        	lineRead = br.readLine();
         }
-        
-        myReader.close();
-        myFile.close();
-        
         Collections.sort(_commands);
+		notifyModelListeners();
+	}
+	/**
+	 * @return the _name
+	 */
+	public String getName() {
+		return _name;
+	}
+	/**
+	 * @param name the _name to set
+	 */
+	public void setName(String name) {
+		this._name = name;
 		notifyModelListeners();
 	}
 }

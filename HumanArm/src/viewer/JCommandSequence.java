@@ -53,7 +53,11 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	/** The selected CommandSequence */
 	CommandSequence _comSeq;
 	/** The selected Command */
-	Command _selected;
+	Command _selectCom;
+	/** The selected Trace */
+	ITrace2D _selectTrace;
+	
+	
 	/** To change Command more precisely */
 	JCommand _comPanel;
 	
@@ -76,7 +80,8 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		_traces = new ArrayList<ITrace2D>();
 		_comList = new ArrayList<CommandSequence>();
 		_comSeq = null;
-		_selected = null;
+		_selectCom = null;
+		_selectTrace = null;
 		
 		buildActions();
 		buildGUI();
@@ -133,7 +138,8 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	}
 	private void updateTrace(ITrace2D trace, CommandSequence comSeq) {
 		trace.removeAllPoints();
-
+		trace.setName(comSeq.getName());
+		
 		// Add points
 		Command last = null;
 		for (Command com : comSeq) {
@@ -146,12 +152,12 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		trace.addPoint(last.time+1.0,last.val);
 		
 		// Put Circle around selected Commands
-		if (_comSeq == comSeq && _selected != null) {
+		if (_comSeq == comSeq && _selectCom != null) {
 			for (Iterator<ITracePoint2D> it = trace.iterator(); it.hasNext();) {
 				ITracePoint2D pt = (ITracePoint2D) it.next();
 				
 				// Matches with selected Command
-				if (pt.getX() == _selected.time && pt.getY() == _selected.val) {
+				if (pt.getX() == _selectCom.time && pt.getY() == _selectCom.val) {
 					pt.addAdditionalPointPainter(new PointPainterDisc(10));
 					// and the next with normal circle
 					pt = (ITracePoint2D) it.next();
@@ -183,8 +189,10 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	 */
 	class MyMouseListener implements MouseListener, MouseMotionListener {
 		/** Memory of where the mouse was pressed */
-		int _mouseY;
-		/** Memory of y position ot selected points */
+		int _mouseX, _mouseY;
+		/** Memory of x position of selected points */
+		double _xBase = 0;
+		/** Memory of y position of selected points */
 		double _yBase = 0;
 		
 		@Override
@@ -203,18 +211,13 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			_fg_drag_mode = true;
 			
 			// If points where selected, deselect them
-			_selected = null;
+			_selectCom = null;
 			if (_comSeq != null) {
-				int index = _comList.indexOf(_comSeq);
-				if (index >= 0) {
-					ITrace2D tr = _traces.get(index);
-					updateTrace(tr, _comSeq);
-				}
-				else {
-					System.err.println("[CommandSequence.MyMouseListener.mousePressed] ComSeq not found.");
-				}
+				updateTrace(_selectTrace, _comSeq);
 			}
+			_selectTrace = null;
 			_comSeq = null;
+			_infoLabel.setText(" - : ");
 			
 //			if (_ptEnd != null ) {
 //				_ptBegin.removeAllAdditionalPointPainters();
@@ -222,20 +225,22 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 //			}
 //			_fg_needUpdate = false;
 			
-			// Memorize Mouse y-position
+			// Memorize Mouse position
+			_mouseX = e.getX();
 			_mouseY = e.getY();
 			
 			ITracePoint2D ptPressed = _chart.getNearestPointEuclid(e);
-			ITrace2D trPressed = ptPressed.getListener();
+			_selectTrace = ptPressed.getListener();
 			// Could get original trace : ITrace2D tr = ptPressed.getListener();
 			//                            if (tr==_trace) System.out.println("Same TRACE");
 			// Memorize Val of selected Points
+			_xBase = ptPressed.getX();
 			_yBase = ptPressed.getY();
 			
 			//System.out.println("Selected point at "+ptPressed.getX()+", "+ptPressed.getY());
 			
 			// Compute Start and End of segment. Command is "linked" on the Start point.
-			Iterator<ITracePoint2D> it = trPressed.iterator();
+			Iterator<ITracePoint2D> it = _selectTrace.iterator();
 			ITracePoint2D ptBegin = null;
 			for (; it.hasNext();) {
 				ITracePoint2D pt = (ITracePoint2D) it.next();
@@ -264,24 +269,24 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 //			_ptEnd.addAdditionalPointPainter(new PointPainterDisc());
 			
 			// Find the right CommandSequence
-			int index = _traces.indexOf(trPressed);
+			int index = _traces.indexOf(_selectTrace);
 			if (index >= 0) {
 				_comSeq = _comList.get(index);
 				// Find Command
-				_selected = _comSeq.finds(ptBegin.getX(), ptBegin.getY());
-				if (_selected != null) {
-					System.out.println("Found "+_selected.toStringP());
+				_selectCom = _comSeq.finds(ptBegin.getX(), ptBegin.getY());
+				if (_selectCom != null) {
+					System.out.println("Found "+_selectCom.toStringP());
 				}
 				
 				// Alert the JCommand
-				_comPanel.setCommand(_selected, _comSeq);
+				_comPanel.setCommand(_selectCom, _comSeq);
 				// Info Panel
-				_infoLabel.setText("Com["+index+"]");
+				_infoLabel.setText(" "+_comSeq.getName()+" : ");
 				
-				updateTrace( trPressed, _comSeq);
+				updateTrace( _selectTrace, _comSeq);
 			}
 			else {
-				System.err.println("[CommandSequence.MyMouseListener.mousePressed] trace not found.");
+				System.err.println("[CommandSequence.MyMouseListener.mousePressed] ComSeq not found.");
 			}
 		}
 
@@ -308,22 +313,34 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			if (_fg_drag_mode != true) {
 				return;
 			}
+			// Compute the horizontal (X) displacement compared to initial segment position.
+			int curX = e.getX();
+			double deltaX = 0;
+			if (e.isShiftDown() == false ) {
+				deltaX= (double)(curX - _mouseX) / (double)_chart.getWidth() *(_selectTrace.getMaxX()-_selectTrace.getMinX());
+			}
+			System.out.println("deltaX ="+(double)(curX - _mouseX)+" width="+(double)_chart.getWidth());
 			// Compute the vertical (Y) displacement compared to initial segment position.
 			int curY = e.getY();
-			double deltaY = (double)(curY - _mouseY) / (double)_chart.getHeight();
-			//System.out.println("delta ="+(double)(curY - _mouseY)+" height="+(double)_chart.getHeight());
+			double deltaY = 0;
+			if (e.isControlDown() == false ) {
+				deltaY = (double)(curY - _mouseY) / (double)_chart.getHeight() * (_selectTrace.getMaxY()-_selectTrace.getMinY());
+			}
+			System.out.println("deltaY ="+(double)(curY - _mouseY)+" height="+(double)_chart.getHeight());
 			
 //			_ptBegin.setLocation(_ptBegin.getX(), _yBase-deltaY);
 //			_ptEnd.setLocation(_ptEnd.getX(), _yBase-deltaY);
 //			
+
+			
 //			_fg_needUpdate = true;
-			_comSeq.changeCommand(_selected, _selected.time, _yBase-deltaY);
+			_comSeq.changeCommand(_selectCom, _xBase+deltaX, _yBase-deltaY);
+			_comPanel.update();
 		}
 		
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			// TODO Auto-generated method stub
-			
 		}
 	}
 
@@ -333,8 +350,8 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		// find the trace
 		int index = _comList.indexOf(model);
 		if (index >= 0) {
-			ITrace2D tr = _traces.get(index);
-			updateTrace(tr, model);
+			_selectTrace = _traces.get(index);
+			updateTrace(_selectTrace, model);
 		}
 		else {
 			System.err.println("[CommandSequence.modelChanged] model not found.");
@@ -390,11 +407,11 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (_comSeq != null && _selected != null) {
+			if (_comSeq != null && _selectCom != null) {
 				int choice = JOptionPane.showConfirmDialog(_chart, "Effacer le point?",
 						"Effacer Pt Consigne", JOptionPane.OK_CANCEL_OPTION);
 				if (choice == 0) {
-					_comSeq.remove(_selected);
+					_comSeq.remove(_selectCom);
 				}
 			}
 			else {

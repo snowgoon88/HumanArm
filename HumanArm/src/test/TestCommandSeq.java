@@ -194,7 +194,7 @@ public class TestCommandSeq {
 		});
 		frame.setLayout(new BorderLayout());
 		
-		CommandSequence com = new CommandSequence();		
+		CommandSequence com = new CommandSequence("com_0");		
 		com.add(new Command(1.0, 0.8));
 		com.add(new Command(0.0, 0.0));
 		com.add(new Command(0.3, 0.3));
@@ -216,13 +216,14 @@ public class TestCommandSeq {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		com2.setName("com_1");
 		seqViewer.add(com2);
 		com2.addModelListener(seqViewer);
 
 	}
 	
 	public void testWrite() {
-		CommandSequence com = new CommandSequence();		
+		CommandSequence com = new CommandSequence("Essai");		
 		com.add(new Command(1.1, 0.8));
 		com.add(new Command(0.1, 0.0));
 		com.add(new Command(0.33, 0.3));

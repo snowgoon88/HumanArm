@@ -56,6 +56,7 @@ public class JCommand extends JPanel {
 			_xSpinModel.setValue(_com.time);
 		}
 		_xSpin = new JSpinner(_xSpinModel);
+		((JSpinner.DefaultEditor)_xSpin.getEditor()).getTextField().setColumns(7);
 		_xSpin.addChangeListener(
 				new ChangeListener() {
 					@Override
@@ -77,6 +78,7 @@ public class JCommand extends JPanel {
 			_ySpinModel.setValue(_com.val);
 		}
 		_ySpin = new JSpinner(_ySpinModel);
+		((JSpinner.DefaultEditor)_ySpin.getEditor()).getTextField().setColumns(7);
 		_ySpin.addChangeListener(
 				new ChangeListener() {
 					@Override
@@ -99,12 +101,20 @@ public class JCommand extends JPanel {
 			_xSpinModel.setValue(_com.time);
 		}
 		_xSpin.setModel(_xSpinModel);
+		((JSpinner.DefaultEditor)_xSpin.getEditor()).getTextField().setColumns(7);
 		
 		_ySpinModel = new SpinnerNumberModel(0.0, 0.0, 10.0, 0.1);
 		if (_com != null) {
 			_ySpinModel.setValue(_com.val);
 		}
 		_ySpin.setModel(_ySpinModel);
+		((JSpinner.DefaultEditor)_ySpin.getEditor()).getTextField().setColumns(7);
+	}
+	public void update() {
+		if (_com != null) {
+			_xSpinModel.setValue(_com.time);
+			_ySpinModel.setValue(_com.val);
+		}	
 	}
 	
 //	public Command getCommand() {
