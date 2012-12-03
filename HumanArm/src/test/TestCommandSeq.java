@@ -201,6 +201,7 @@ public class TestCommandSeq {
 		
 		// Graphical part
 		JCommandSequence seqViewer = new JCommandSequence(com);
+		com.addModelListener(seqViewer);
 		frame.add( seqViewer, BorderLayout.CENTER);
 		
 		frame.setVisible(true);

@@ -12,7 +12,7 @@ import java.util.ListIterator;
  * @author Alain.Dutech@loria.fr
  *
  */
-public class CommandSequence implements Iterable<Command> {
+public class CommandSequence extends Model<CommandSequenceListener> implements Iterable<Command> {
 	
 	/** List of Commands */
 	LinkedList<Command> _commands;
@@ -151,6 +151,7 @@ public class CommandSequence implements Iterable<Command> {
 		Collections.sort(_commands);
 		_next = null;
 		_it_com = null;
+		notifyModelListeners();
 		return res;
 	}
 	public boolean remove(Command obj) {
@@ -158,6 +159,7 @@ public class CommandSequence implements Iterable<Command> {
 		Collections.sort(_commands);
 		_next = null;
 		_it_com = null;
+		notifyModelListeners();
 		return res;
 	}
 	public void changeCommand(Command obj, double time, double val ) {
@@ -168,11 +170,13 @@ public class CommandSequence implements Iterable<Command> {
 		_next = null;
 		_it_com = null;
 		
+		notifyModelListeners();
 		System.out.println(this.toString());
 	}
 	
 	public void clear() {
 		_commands.clear();
+		notifyModelListeners();
 	}
 
 	/**

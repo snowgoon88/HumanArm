@@ -30,6 +30,12 @@ public class JCommand extends JPanel {
 	JSpinner _xSpin;
 	/** Spinner Model for X */
 	SpinnerNumberModel _xSpinModel;
+	/** Label for Y */
+	JLabel _yLabel;
+	/** Spinner for Y */
+	JSpinner _ySpin;
+	/** Spinner Model for X */
+	SpinnerNumberModel _ySpinModel;
 	
 	public JCommand( Command com, CommandSequence comSequence ) {
 		super();
@@ -53,12 +59,35 @@ public class JCommand extends JPanel {
 				new ChangeListener() {
 					@Override
 					public void stateChanged(ChangeEvent e) {
-						_comSeq.changeCommand(_com, _xSpinModel.getNumber().doubleValue(), _com.val);
-						System.out.println("xSpin changed");
+						if (_com != null ) {
+							_comSeq.changeCommand(_com, _xSpinModel.getNumber().doubleValue(), _com.val);
+							System.out.println("xSpin changed");
+						}
 					}
 					
 				});
 		add( _xSpin );
+		
+		_yLabel = new JLabel("Y:");
+		add( _yLabel );
+		
+		_ySpinModel = new SpinnerNumberModel(0.0, 0.0, 10.0, 0.1);
+		if (_com != null) {
+			_ySpinModel.setValue(_com.val);
+		}
+		_ySpin = new JSpinner(_ySpinModel);
+		_ySpin.addChangeListener(
+				new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						if (_com != null ) {
+							_comSeq.changeCommand(_com, _com.time, _ySpinModel.getNumber().doubleValue());
+							System.out.println("ySpin changed");
+						}
+					}
+					
+				});
+		add( _ySpin );
 	}
 	
 	public void setCommand( Command com ) {
@@ -68,5 +97,15 @@ public class JCommand extends JPanel {
 			_xSpinModel.setValue(_com.time);
 		}
 		_xSpin.setModel(_xSpinModel);
+		
+		_ySpinModel = new SpinnerNumberModel(0.0, 0.0, 10.0, 0.1);
+		if (_com != null) {
+			_ySpinModel.setValue(_com.val);
+		}
+		_ySpin.setModel(_ySpinModel);
+	}
+	
+	public Command getComman() {
+		return _com;
 	}
 }
