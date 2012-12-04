@@ -19,5 +19,5 @@ TAR_DIV = $(HOMEDIR)/readme.txt \
 
 # Regle pour creer l'archive
 .PHONY:	tgz
-tgz:	$(TAR_SRC) $(TAR_LIBS) $(TAR_DIV)
+tgz:	
 	tar czvf $(PROJET)_src_$(VERSION).tgz -h -C .. --exclude=".git" --exclude="*~" $(TAR_SRC) $(TAR_LIBS) $(TAR_DIV)
