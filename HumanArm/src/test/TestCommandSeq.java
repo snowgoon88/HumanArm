@@ -6,6 +6,8 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -250,17 +252,68 @@ public class TestCommandSeq {
 		System.out.println(com.toString());
 	}
 	
+	public void makeExemple() throws IOException {
+		// Open up a file
+		FileWriter myFile = new FileWriter( "consigne_example.data" );
+		BufferedWriter myWriter = new BufferedWriter( myFile );
+
+		CommandSequence com = new CommandSequence();
+		
+		// Biceps_court => flexion du coude.
+		com.clear();
+		com.setName("0-BicepsCourt");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		// Triceps latéral => extension du coude.
+		com.clear();
+		com.setName("1-TricepsLat");
+		com.add(new Command(0, 0.1));
+		com.add(new Command(0.3, 0.0));
+		com.write(myWriter);
+		
+		// Deltoid anterieur => flexion de l'épaule
+		com.clear();
+		com.setName("2-DeltoidAnt");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		// Deltoid posterieur => extension de l'épaule
+		com.clear();
+		com.setName("3-DeltoidPost");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		// biceps long => flexion (épaule+coude)
+		com.clear();
+		com.setName("4-BicepsLong");
+		com.add(new Command(0, 0.1));
+		com.add(new Command(0.3, 0.0));
+		com.write(myWriter);
+		
+		// triceps long => extension (épaule+coude)
+		com.clear();
+		com.setName("5-TricepsLong");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		myWriter.close();
+        myFile.close();
+	}
+	
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		TestCommandSeq app = new TestCommandSeq();
 		//app.testCreate();
 		//app.testAddFocus();
 		//app.testSpeed();
-		app.testGraphic();
+		//app.testGraphic();
 		//app.testWrite();
 		//app.testRead();
+		app.makeExemple();
 	}
 
 }

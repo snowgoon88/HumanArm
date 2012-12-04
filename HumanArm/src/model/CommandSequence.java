@@ -117,7 +117,10 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 			return focusAtTime(time);
 		}
 		
-		// Check if still in the right time intervale
+		// Check if still in the right time intervale or no next point
+		if (_next == null) {
+			return _current.val;
+		}
 		if (time < _next.time) {
 			return _current.val;
 		}
