@@ -16,11 +16,11 @@ import Jama.Matrix;
  * 1 : angle du coude
  * 
  * Les 6 muscles sont, dans l'ordre :
- * 0 : biceps long => flexion le coude. 
+ * 0 : biceps court => flexion du coude. 
  * 1 : Triceps latéral => extension du coude.
  * 2 : Deltoid anterieur => flexion de l'épaule
  * 3 : Deltoid posterieur => extension de l'épaule
- * 4 : biceps court => flexion (épaule+coude)
+ * 4 : biceps long => flexion (épaule+coude)
  * 5 : triceps long => extension (épaule+coude)
  * 
  * L'utilisation typique est :
