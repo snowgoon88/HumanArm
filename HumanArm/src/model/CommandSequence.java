@@ -87,15 +87,18 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 			return -1;
 		}
 		
+		_next = null;
 		_it_com = _commands.listIterator();
 		_current = _it_com.next();
 		while (_it_com.hasNext()) {
 			_next = _it_com.next();
 			if (time >= _current.time && time < _next.time ) {
+				//System.out.println("focus "+toString());
 				return _current.val;
 			}
 			_current = _next;
 		}
+		//System.out.println("focus "+toString());
 		return _current.val;
 	}
 	/**
@@ -110,29 +113,37 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 	public double getValAtTimeFocussed(double time) {
 		// if not focussed, focus
 		if (_current == null ) {
+			//System.out.println(_name+" : not focussed");
 			return focusAtTime(time);
 		}
 		// if too early, refocus
 		if (time < _current.time ) {
+			//System.out.println(_name+" : too early");
 			return focusAtTime(time);
 		}
 		
 		// Check if still in the right time intervale or no next point
 		if (_next == null) {
+			//System.out.println(_name+" : no next");
 			return _current.val;
 		}
 		if (time < _next.time) {
+			//System.out.println(_name+" : next is right after");
 			return _current.val;
 		}
 		
 		// look for the next if possible
 		while (_it_com.hasNext()) {
+			_current = _next;
 			_next = _it_com.next();
 			if (time >= _current.time && time < _next.time ) {
+				//System.out.println("getVal "+toString());
 				return _current.val;
 			}
-			_current = _next;
 		}
+		_current = _next;
+		_next = null;
+		//System.out.println("getVal "+toString());
 		return _current.val;
 	}
 	
@@ -203,7 +214,7 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 	@Override
 	public String toString() {
 		String str = "CS["+_name+"]=" + _commands;
-		str += "\n  Current "+_next;
+		str += "\n  Current="+_current+"\t Next="+_next;
 		return str;
 	}
 	

@@ -301,6 +301,37 @@ public class TestCommandSeq {
         myFile.close();
 	}
 	
+	void testComputeVal() {
+		CommandSequence com0 = new CommandSequence();
+		// Biceps_court => flexion du coude.
+		com0.clear();
+		com0.setName("0-BicepsCourt");
+		com0.add(new Command(0, 0));
+		System.out.println(com0.toString());
+		
+		CommandSequence com1 = new CommandSequence();
+		// Triceps latéral => extension du coude.
+		com1.clear();
+		com1.setName("1-TricepsLat");
+		com1.add(new Command(0, 0.1));
+		com1.add(new Command(0.3, 0.0));
+		System.out.println(com1.toString());
+		
+		
+		CommandSequence com2 = new CommandSequence();
+		// Triceps latéral => extension du coude.
+		com2.clear();
+		com2.setName("2-DeltoidAnt");
+		com2.add(new Command(0, 0.1));
+		com2.add(new Command(0.3, 0.3));
+		com2.add(new Command(0.7, 0.21));
+		System.out.println(com2.toString());
+		
+		for (double t=0; t<1.0; t += 0.1 ) {
+			System.out.println(t+" : "+com0.getValAtTimeFocussed(t)+"\t"+com1.getValAtTimeFocussed(t)+"\t"+com2.getValAtTimeFocussed(t));
+		}
+	}
+	
 	/**
 	 * @param args
 	 * @throws IOException 
@@ -313,7 +344,8 @@ public class TestCommandSeq {
 		//app.testGraphic();
 		//app.testWrite();
 		//app.testRead();
-		app.makeExemple();
+		//app.makeExemple();
+		app.testComputeVal();
 	}
 
 }

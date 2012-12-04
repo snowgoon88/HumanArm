@@ -4,7 +4,9 @@
 package example;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import Jama.Matrix;
@@ -25,6 +27,10 @@ public class ExperienceConsole {
 	/** Le bras complet */
 	CompleteArm _arm = new CompleteArm();
 	
+	/** Pour écrire dans un beau fichier en sortie */
+	FileWriter _file = null;
+	BufferedWriter _bw = null;
+	
 	/**
 	 * Lance l'application.
 	 * @param args
@@ -33,8 +39,9 @@ public class ExperienceConsole {
 	public static void main(String[] args) throws IOException {
 		ExperienceConsole app = new ExperienceConsole();
 		app.readCommandSequences("consigne_example.data");
+		app.openWriteFile("result_example.data");
 		app.run( 20.0, 30.0, 5.0, 0.025);
-
+		app.closeWriteFile();
 	}
 	
 	/**
@@ -46,8 +53,9 @@ public class ExperienceConsole {
 	 * @param degAng1 Angle1 initial, en degré.
 	 * @param maxTime Temps maximum de la simulation, en secondes.
 	 * @param dt Intervale de temps pour la simulation, en secondes.
+	 * @throws IOException 
 	 */
-	public void run(double degAng0, double degAng1, double maxTime, double dt) {
+	public void run(double degAng0, double degAng1, double maxTime, double dt) throws IOException {
 		// Setup in resting position
 		_arm.setup(Math.toRadians(degAng0), Math.toRadians(degAng1));
 		System.out.println(_arm.toString());
@@ -68,6 +76,33 @@ public class ExperienceConsole {
 			_arm.applyCommand(u, dt);
 			System.out.println("TIME = "+t);
 			System.out.println(_arm.toString());
+			
+			// Ecrit dans fichier
+			if (_bw != null ) {
+				_bw.write(Double.toString(t));
+				// Pour chaque muscle
+				Matrix act = _arm.getMuscleActivation();
+				Matrix tau = _arm.getMuscles().getTension();
+				for (int i = 0; i < _consigne.length; i++) {
+					_bw.write("\t"+Double.toString(u.get(0, i))
+							+"\t"+Double.toString(act.get(0, i))
+							+"\t"+Double.toString(tau.get(0, i)));
+				}
+				// Pour chaque articulation
+				Matrix cpl = _arm.getMuscles().getTorque();
+				Matrix ang = _arm.getArm().getArmPos();
+				Matrix spd = _arm.getArm().getArmSpeed();
+				double[] x = _arm.getArm().getArmX();
+				double[] y = _arm.getArm().getArmY();
+				for (int i = 0; i < 2; i++) {
+					_bw.write("\t"+Double.toString(cpl.get(0, i))
+							+"\t"+Double.toString(ang.get(0, i))
+							+"\t"+Double.toString(spd.get(0, i))
+							+"\t"+Double.toString(x[i])
+							+"\t"+Double.toString(y[i]));
+				}
+				_bw.newLine();
+			}
 		}
 	}
 	
@@ -90,4 +125,25 @@ public class ExperienceConsole {
         myFile.close();
 	}
 
+	/**
+	 * Open a file for Writing.
+	 * @param fileName
+	 * @throws IOException
+	 */
+	public void openWriteFile(String fileName) throws IOException {
+		// open a file
+		_file = new FileWriter( fileName );
+		_bw = new BufferedWriter( _file );
+		
+		_bw.write( "# temps; Muscles: 6x(consigne,act,tension); Articulation: 2x(couple,angle,vitesse,x,y) ");
+		_bw.newLine();
+	}
+	/** 
+	 * Close opened file.
+	 * @throws IOException
+	 */
+	public void closeWriteFile() throws IOException {
+		_bw.close();
+		_file.close();
+	}
 }
