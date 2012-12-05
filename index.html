@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>HumanArm by snowgoon88</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>HumanArm</h1>
+        <p>Java model of a simple HumanArm as used by Li06, Martin11, etc</p>
+
+        <p class="view"><a href="https://github.com/snowgoon88/HumanArm">View the Project on GitHub <small>snowgoon88/HumanArm</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/snowgoon88/HumanArm/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/snowgoon88/HumanArm/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/snowgoon88/HumanArm">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>Les bases</h3>
+
+<p>Les commentaires dans les classes sont assez explicites.</p>
+
+<p>La classe principale du modèle est 'model/CompleteArm'. Il y a en gros 3 étages
+pour simuler le bras :
+ a) passer des consignes données aux muscles à l'activation des muscles. C'est
+le rôle de la classe 'model/NeuroControl';
+ b) passer de l'activation des muscles aux forces exercées sur les
+articulations. C'est le rôle de la classe 'model/SimpleMuscle';
+ c) passer des forces exercées sur les articulations aux mouvement effectifs
+du bras. C'est le rôle de la classe 'model/Arm'.
+Ces trois étapes sont mise en place dans 'model/CompleteArm'.</p>
+
+<p>Trois examples très simples sont fournis.</p>
+
+<ul>
+<li>'example/ArmConsole' utilise juste une sortie console pour donner la position
+du bras en fonction du temps, quand des consignes sont appliquées.</li>
+<li>'example/ArmGraphic' montre comment on peut faire une visualisation simple du
+bras. Mais le bras n'est pas simulé, juste placé à différentes positions.</li>
+<li>'example/ExperienceConsole' utilise les consignes du fichier 'data/consigne_example.data'
+pour simuler le bras et stocker toutes les variables dans le fichier
+'data/result_example.data'.</li>
+</ul><h3>Version actuelle : v1.5</h3>
+
+<p>A télécharger ici : LINK</p>
+
+<h3>Anciennes versions</h3>
+
+<ul>
+<li>v1.5 : ArmGraphic amélioré et Experience avec sauvegarde (LINK)</li>
+<li>v1.0 : Fonctionnel avec exemples console et graphic. (LINK)</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/snowgoon88">snowgoon88</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
