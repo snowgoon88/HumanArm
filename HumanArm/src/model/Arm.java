@@ -26,10 +26,11 @@ import utils.JamaU;
  * 
  * Sortie : l'état du bras.
  * 
+ * De plus, Arm prévient ses Listeners des changements pour qu'ils se mettent à jour.
+ * 
  * @author Alain.Dutech@loria.fr
- *
  */
-public class Arm {
+public class Arm extends Model<ArmModelListener> {
 	
 	/** Dimension of the state space */
 	static int _dimQ = 2;
@@ -89,6 +90,7 @@ public class Arm {
 			_pos.add(new Point3d());
 		}
 		updateEuclidianPosition();
+		
 	}
 	
 	private void updateEuclidianPosition() {
@@ -188,6 +190,8 @@ public class Arm {
 		
 		// then update euclidian position
 		updateEuclidianPosition();
+		update2DPosition();
+		notifyModelListeners();
 	}
 
 	/**
@@ -237,7 +241,9 @@ public class Arm {
 		if( q.getColumnDimension() == _q.getColumnDimension() && 
 				q.getRowDimension() == _q.getRowDimension()) {
 			this._q = q;
+			updateEuclidianPosition();
 			update2DPosition();
+			notifyModelListeners();
 		}
 	}
 	/**
@@ -247,7 +253,9 @@ public class Arm {
 	public void setArmPos(double[] vecq) {
 		if (vecq.length == _q.getColumnDimension()) {
 			this._q = new Matrix(vecq, 1);
+			updateEuclidianPosition();
 			update2DPosition();
+			notifyModelListeners();
 		}
 	}
 
@@ -266,6 +274,7 @@ public class Arm {
 		if( dq.getColumnDimension() == _dq.getColumnDimension() && 
 				dq.getRowDimension() == _dq.getRowDimension()) {
 			this._dq = dq;
+			notifyModelListeners();
 		}
 	}
 	/**
@@ -275,6 +284,7 @@ public class Arm {
 	public void setArmSpeed(double[] vecdq) {
 		if (vecdq.length == _q.getColumnDimension()) {
 			this._dq = new Matrix(vecdq, 1);
+			notifyModelListeners();
 		}
 	}
 
