@@ -1,0 +1,26 @@
+# CommandSequence : 0-BicepsCourt
+0-BicepsCourt
+1
+0.0	0.0
+# CommandSequence : 1-TricepsLat
+1-TricepsLat
+2
+0.0	0.1
+0.3	0.0
+# CommandSequence : 2-DeltoidAnt
+2-DeltoidAnt
+1
+0.0	0.0
+# CommandSequence : 3-DeltoidPost
+3-DeltoidPost
+1
+0.0	0.0
+# CommandSequence : 4-BicepsLong
+4-BicepsLong
+2
+0.0	0.1
+0.3	0.0
+# CommandSequence : 5-TricepsLong
+5-TricepsLong
+1
+0.0	0.0

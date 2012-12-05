@@ -11,11 +11,16 @@ import java.io.IOException;
 
 import Jama.Matrix;
 
+import model.Command;
 import model.CommandSequence;
 import model.CompleteArm;
 
 /**
  * En utilisant les consignes du fichier 'consigne_example.data', simule le bras.
+ * Toutes les données de simulation sont enregistrées dans 'data/result_exemple.data'.
+ * 
+ * Les consignes du fichier 'data/consigne_example.data' activent les muscles 1 et 4
+ * pendant 300ms. On peut recréer ces données en utilisant la méthode 'makeExample'.
  * 
  * @author Alain.Dutech@loria.fr
  */
@@ -38,9 +43,17 @@ public class ExperienceConsole {
 	 */
 	public static void main(String[] args) throws IOException {
 		ExperienceConsole app = new ExperienceConsole();
-		app.readCommandSequences("consigne_example.data");
-		app.openWriteFile("result_example.data");
+		
+		// Si besoin , on peut recréer les données exemples
+		// app.makeExample( "data/consigne_example.data" );
+		
+		// Lit les consigne
+		app.readCommandSequences("data/consigne_example.data");
+		// Ouvre le fichier pour stocker les résultats
+		app.openWriteFile("data/result_example.data");
+		// Simule à partir de la position (20,30), pd 5 secondes, avec dt=25ms
 		app.run( 20.0, 30.0, 5.0, 0.025);
+		// Ferme le fichier résultat
 		app.closeWriteFile();
 	}
 	
@@ -145,5 +158,59 @@ public class ExperienceConsole {
 	public void closeWriteFile() throws IOException {
 		_bw.close();
 		_file.close();
+	}
+	
+	/**
+	 * Create Commands and store them in fileName.
+	 * @param fileName Where to store the created CommandSequences.
+	 * @throws IOException
+	 */
+	public void makeExample(String fileName) throws IOException {
+		// Open up a file
+		FileWriter myFile = new FileWriter( fileName );
+		BufferedWriter myWriter = new BufferedWriter( myFile );
+
+		CommandSequence com = new CommandSequence();
+		
+		// Biceps_court => flexion du coude.
+		com.clear();
+		com.setName("0-BicepsCourt");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		// Triceps latéral => extension du coude.
+		com.clear();
+		com.setName("1-TricepsLat");
+		com.add(new Command(0, 0.1));
+		com.add(new Command(0.3, 0.0));
+		com.write(myWriter);
+		
+		// Deltoid anterieur => flexion de l'épaule
+		com.clear();
+		com.setName("2-DeltoidAnt");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		// Deltoid posterieur => extension de l'épaule
+		com.clear();
+		com.setName("3-DeltoidPost");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		// biceps long => flexion (épaule+coude)
+		com.clear();
+		com.setName("4-BicepsLong");
+		com.add(new Command(0, 0.1));
+		com.add(new Command(0.3, 0.0));
+		com.write(myWriter);
+		
+		// triceps long => extension (épaule+coude)
+		com.clear();
+		com.setName("5-TricepsLong");
+		com.add(new Command(0, 0));
+		com.write(myWriter);
+		
+		myWriter.close();
+        myFile.close();
 	}
 }
