@@ -3,7 +3,7 @@
 # >make class
 
 PROJET = HumanArm
-VERSION = 1.5
+VERSION = 2.0
 
 HOMEDIR = HumanArm
 
@@ -18,11 +18,16 @@ SRC =     model/Arm.java \
           model/Model.java \
           model/ModelListener.java \
           utils/JamaU.java \
+          utils/GraphicHelpe.java \
           viewer/JArm2D.java \
           viewer/JArmLabel.java \
+          viewer/JCommand.java \
+          viewer/JCommandSequence.java \
           example/ArmConsole.java \
           example/ArmGraphic.java \
-          example/ExperienceConsole.java
+          example/ExperienceConsole.java \
+          gui/ExpGUI.java \
+          gui/JExperience.java
 
 # Regle pour compiler les classes
 .PHONY:	class

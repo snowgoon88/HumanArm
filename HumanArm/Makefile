@@ -1,6 +1,8 @@
 # Makefile 
 # Pour compiler
 # >make class
+# Pour lancer l'expérienceGUI
+# >make rgui
 # Pour lancer l'expérience exemple
 # >make re
 # Pour lancer le programme en mode console ou graphique
@@ -10,15 +12,18 @@
 # >make tgz
 
 PROJET = HumanArm
-VERSION = 1.5
+VERSION = 2.0
 
 HOMEDIR = HumanArm
 
 TAR_SRC = $(HOMEDIR)/src/example \
+          $(HOMEDIR)/src/gui \
           $(HOMEDIR)/src/model \
           $(HOMEDIR)/src/utils \
           $(HOMEDIR)/src/viewer/JArm2D.java \
-          $(HOMEDIR)/src/viewer/JArmLabel.java
+          $(HOMEDIR)/src/viewer/JArmLabel.java \
+          $(HOMEDIR)/src/viewer/JCommand.java \
+          $(HOMEDIR)/src/viewer/JCommandSequence.java
 
 TAR_LIBS = $(HOMEDIR)/libs
 
@@ -36,6 +41,11 @@ class:
 .PHONY:	tgz
 tgz:	
 	tar czvf $(PROJET)_src_$(VERSION).tgz -h -C .. --exclude=".git" --exclude="*~" $(TAR_SRC) $(TAR_LIBS) $(TAR_DIV)
+
+# Regle pour lancer l'experience GUI
+.PHONY: rgui
+rgui:
+	java -cp libs/jama-1.0.2.jar:libs/jchart2d-3.2.2.jar:libs/vecmath-1.5.2.jar:src gui/ExpGUI
 
 # Regle pour lancer l'experience
 .PHONY: re
