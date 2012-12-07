@@ -35,6 +35,17 @@ public class GraphicHelper {
 	    }
 	}
 	
+	/**
+	 * Create SpinnerNumber and add to panel a JSpinner with this model.
+	 * @param panel where to add the JSpinner
+	 * @param value Initial value of JSpinner
+	 * @param min min value of JSpinner
+	 * @param max max value of JSpinner
+	 * @param stepSize stepsize of JSpinner
+	 * @param label Label that we be on the left of JSpinner
+	 * @param maxFormat to compute size of JSpinner (ex "00.000").
+	 * @return a SpinnerNumberModel attached to the JSPinner.
+	 */
 	public SpinnerNumberModel addJSpinNumber( JPanel panel,
 			double value, double min, double max, double stepSize,
 			String label, String maxFormat ) {
