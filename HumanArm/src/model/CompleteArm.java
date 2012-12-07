@@ -54,6 +54,8 @@ public class CompleteArm {
 		for (int i = 0; i < 6; i++) {
 			_nc[i] = new NeuroControl();
 		}
+		
+		setup(0,0);
 	}
 	
 	/**

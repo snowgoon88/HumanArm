@@ -10,8 +10,9 @@ import info.monitorenter.gui.chart.pointpainters.PointPainterDisc;
 import info.monitorenter.gui.chart.traces.Trace2DSimple;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -23,6 +24,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -30,7 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
-import utils.IconLoader;
+import utils.GraphicHelper;
 
 import model.Command;
 import model.CommandSequence;
@@ -64,6 +66,8 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	/** Info Label */
 	JLabel _infoLabel;
 	
+	/** PopupMenu */
+	PopUpChart _popupMenu;
 	/** Action to add a new Command */
 	Action _addCommandAct;
 	/** Action to remove the selected Command */
@@ -71,9 +75,8 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	/** Flag that allow dragging Command */
 	boolean _fg_drag_mode = false;
 	
-	/** Default Color */
-	Color [] _defColors = {Color.blue, Color.red, Color.green,
-			Color.cyan, Color.magenta, Color.pink, Color.black };
+	/** To help in Graphics */
+	GraphicHelper _gh = new GraphicHelper();
 	
 	public JCommandSequence() {
 		super();
@@ -83,10 +86,11 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		_selectCom = null;
 		_selectTrace = null;
 		
+		
 		buildActions();
 		buildGUI();
-		
-		_chart.setComponentPopupMenu( new PopUpChart() );	
+		_popupMenu = new PopUpChart();
+		_chart.setComponentPopupMenu( _popupMenu );	
 	}
 	
 	public boolean add(CommandSequence obj) {
@@ -96,11 +100,11 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		ITrace2D trace = new Trace2DSimple();
 		_chart.addTrace(trace);
 		_traces.add( trace );
-		trace.setColor(_defColors[_comList.size() % _defColors.length]);
+		trace.setColor(_gh._defColors[_comList.size() % _gh._defColors.length]);
 		trace.setVisible(true);
 		
 		updateTrace(trace, obj);
-		
+		_popupMenu.addTrace(trace, true);
 		return res;
 	}
 
@@ -169,7 +173,7 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	}
 	
 	private void buildActions() {
-		IconLoader iconLoader = new IconLoader();
+		GraphicHelper iconLoader = new GraphicHelper();
 		_addCommandAct = new AddCommandAction("Add Pt",
 				iconLoader.createImageIcon("list-add.png", "Add"),
 				"Ajouter un nouveau point de consigne",
@@ -229,8 +233,40 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			_mouseX = e.getX();
 			_mouseY = e.getY();
 			
-			ITracePoint2D ptPressed = _chart.getNearestPointEuclid(e);
-			_selectTrace = ptPressed.getListener();
+//			System.out.println("-----------------------------------------------");
+//			System.out.println("selectTrace="+_selectTrace);
+//			System.out.println("mouse="+e.getX()+" "+e.getY());
+			ITracePoint2D ptPressed = _chart.getNearestPointEuclid(e.getX(), e.getY());
+			if (ptPressed == null ) {
+				return;
+			}
+//			System.out.println("pressed="+ptPressed.toString());
+//			System.out.println("       ="+ptPressed.getScaledX()+" "+ptPressed.getX());
+			// look only among visible ITrace
+			double minDist = Float.MAX_VALUE;
+			ITracePoint2D ptSelected = null;
+			for (ITrace2D tr : _traces) {
+				//System.out.println("trace="+tr.getName());
+				if (tr.isVisible()) {
+					//System.out.println("is Visible");
+					for (Iterator<ITracePoint2D> it = tr.iterator(); it.hasNext();) {
+						ITracePoint2D point = (ITracePoint2D) it.next();
+						double d=Math.sqrt((point.getX()-ptPressed.getX())*(point.getX()-ptPressed.getX())
+								+(point.getY()-ptPressed.getY())*(point.getY()-ptPressed.getY()));
+						if (d < minDist) {
+							minDist = d;
+							ptSelected = point;
+							_selectTrace = tr;
+						}
+					}
+				}
+				//System.out.println("d="+minDist+" ptSel="+ptSelected+" tr="+_selectTrace);
+			}
+			ptPressed = ptSelected;
+			if (ptPressed == null ) {
+				return;
+			}
+			//_selectTrace = ptPressed.getListener();
 			// Could get original trace : ITrace2D tr = ptPressed.getListener();
 			//                            if (tr==_trace) System.out.println("Same TRACE");
 			// Memorize Val of selected Points
@@ -422,12 +458,33 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 
 	/** A popup menu over charts */
 	class PopUpChart extends JPopupMenu {
-		JMenuItem anItem;
+		
+		/**
+		 * Build the basic menu with actions.
+		 */
 		public PopUpChart() {
+			// Actions
+			JMenuItem anItem;
 			anItem = new JMenuItem(_addCommandAct);
 			add(anItem);
 			anItem = new JMenuItem(_removeCommandAct);
 			add(anItem);
+			addSeparator();
+		}
+		/**
+		 * Add a CheckBox for a ITrace.
+		 */
+		public void addTrace( final ITrace2D trace, boolean visible ) {
+			JCheckBoxMenuItem check = new JCheckBoxMenuItem(trace.getName());
+			check.setSelected(visible);
+			trace.setVisible(visible);
+			check.addItemListener(new ItemListener() {			
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					trace.setVisible(!trace.isVisible());
+				}
+			});
+			add(check);
 		}
 	}
 }

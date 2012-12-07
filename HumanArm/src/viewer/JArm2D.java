@@ -154,6 +154,13 @@ public class JArm2D extends JPanel implements ArmModelListener {
 		_endX.setBufferSize(size);
 		_endY.setBufferSize(size);
 	}
+	/** 
+	 * Empty the memory trajectory
+	 */
+	public void resetMemory() {
+		_endX.clear();
+		_endY.clear();
+	}
 	
 	/**
 	 * Is the Memory drawn on JPanel

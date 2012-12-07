@@ -213,7 +213,7 @@ public class TestCommandSeq {
 		CommandSequence com2 = new CommandSequence();
 
 		try {
-			com2.read("essai_command.data");
+			com2.read("data/essai_command.data");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -232,7 +232,7 @@ public class TestCommandSeq {
 		com.add(new Command(2.2, 0.1));
 		
 		try {
-			com.write("essai_command.data");
+			com.write("data/essai_command.data");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -243,7 +243,7 @@ public class TestCommandSeq {
 		CommandSequence com = new CommandSequence();
 		
 		try {
-			com.read("essai_command.data");
+			com.read("data/essai_command.data");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -254,7 +254,7 @@ public class TestCommandSeq {
 	
 	public void makeExemple() throws IOException {
 		// Open up a file
-		FileWriter myFile = new FileWriter( "consigne_example.data" );
+		FileWriter myFile = new FileWriter( "data/consigne_example.data" );
 		BufferedWriter myWriter = new BufferedWriter( myFile );
 
 		CommandSequence com = new CommandSequence();
@@ -341,11 +341,11 @@ public class TestCommandSeq {
 		//app.testCreate();
 		//app.testAddFocus();
 		//app.testSpeed();
-		//app.testGraphic();
+		app.testGraphic();
 		//app.testWrite();
 		//app.testRead();
 		//app.makeExemple();
-		app.testComputeVal();
+		//app.testComputeVal();
 	}
 
 }
