@@ -3,8 +3,6 @@
  */
 package model;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.text.DecimalFormat;
 
 /**

@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Stroke;
 
 import javax.swing.JLabel;
@@ -186,6 +185,7 @@ public class JExperience extends JPanel {
 		}
 		rightTabPane.addTab("Articulations", null, jointPanel, null);
 
+		
 		this.setVisible(true);
 	}
 	
@@ -219,8 +219,8 @@ public class JExperience extends JPanel {
 		Matrix cpl = _compArm.getMuscles().getTorque();
 		Matrix ang = _compArm.getArm().getArmPos();
 		Matrix spd = _compArm.getArm().getArmSpeed();
-		double[] x = _compArm.getArm().getArmX();
-		double[] y = _compArm.getArm().getArmY();
+//		double[] x = _compArm.getArm().getArmX();
+//		double[] y = _compArm.getArm().getArmY();
 		for (int i = 0; i < _nbJoint; i++) {
 			_cplTraces[i].addPoint(t, cpl.get(0, i));
 			_angTraces[i].addPoint(t, ang.get(0, i));
@@ -230,10 +230,20 @@ public class JExperience extends JPanel {
 		repaint();
 	}
 	
+	/**
+	 * Add one CommandSequence as consigne.
+	 * Update the ArrayList, notify _comSeqViewer.
+	 * @param consigne
+	 */
 	public void addConsigne( CommandSequence consigne ) {
-			_comSeqViewer.add( consigne );
-			consigne.addModelListener(_comSeqViewer);
-			
-			repaint();
+		_comSeqViewer.add( consigne );
+		consigne.addModelListener(_comSeqViewer);
+
+		repaint();
+	}
+	public void removeAllConsigne() {
+		_comSeqViewer.clear();
+		
+		repaint();
 	}
 }

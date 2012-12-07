@@ -93,6 +93,12 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		_chart.setComponentPopupMenu( _popupMenu );	
 	}
 	
+	/**
+	 * Add a new CommandSequence model.
+	 * Create ITrace2D, update _comList, _traces and setup PopuMenu.
+	 * @param obj
+	 * @return true if ok
+	 */
 	public boolean add(CommandSequence obj) {
 		boolean res = _comList.add(obj);
 		
@@ -106,6 +112,16 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		updateTrace(trace, obj);
 		_popupMenu.addTrace(trace, true);
 		return res;
+	}
+	/**
+	 * Clear all CommandSequences.
+	 * Update _chart, _comList, _traces and popupMenu.
+	 */
+	public void clear() {
+		_chart.removeAllTraces();
+		_traces.clear();
+		_comList.clear();
+		_popupMenu.removeAllTrace();
 	}
 
 	/**
@@ -485,6 +501,16 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 				}
 			});
 			add(check);
+		}
+		public void removeAllTrace() {
+			removeAll();
+			// Actions
+			JMenuItem anItem;
+			anItem = new JMenuItem(_addCommandAct);
+			add(anItem);
+			anItem = new JMenuItem(_removeCommandAct);
+			add(anItem);
+			addSeparator();
 		}
 	}
 }

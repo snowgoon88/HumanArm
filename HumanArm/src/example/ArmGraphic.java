@@ -4,12 +4,8 @@
 package example;
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
-import java.awt.HeadlessException;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.swing.JFrame;
 
@@ -17,7 +13,6 @@ import Jama.Matrix;
 
 import model.CompleteArm;
 
-import utils.JamaU;
 import viewer.JArm2D;
 import viewer.JArmLabel;
 
@@ -75,7 +70,6 @@ public class ArmGraphic {
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
