@@ -3,10 +3,13 @@
  */
 package viewer;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import javax.swing.JLabel;
-import utils.JamaU;
+
 import model.Arm;
-import model.ArmModelListener;
+import utils.JamaU;
 
 /**
  * Un JLabel qui affiche la position et la vitesse du bras.
@@ -15,7 +18,7 @@ import model.ArmModelListener;
  *
  */
 @SuppressWarnings("serial")
-public class JArmLabel extends JLabel implements ArmModelListener {
+public class JArmLabel extends JLabel implements Observer {
 
 	/** The model to display */
 	Arm _arm;
@@ -41,7 +44,7 @@ public class JArmLabel extends JLabel implements ArmModelListener {
 	}
 
 	@Override
-	public void modelChanged(Arm model) {
+	public void update(Observable model, Object o) {
 		setText(getDisplayString());
 	}
 }

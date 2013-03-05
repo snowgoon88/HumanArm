@@ -4,10 +4,12 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Observable;
 
 import javax.vecmath.Point3d;
-import Jama.Matrix;
+
 import utils.JamaU;
+import Jama.Matrix;
 
 
 /**
@@ -29,7 +31,7 @@ import utils.JamaU;
  * 
  * @author Alain.Dutech@loria.fr
  */
-public class Arm extends Model<ArmModelListener> {
+public class Arm extends Observable {
 	
 	/** Dimension of the state space */
 	static int _dimQ = 2;
@@ -190,7 +192,8 @@ public class Arm extends Model<ArmModelListener> {
 		// then update euclidian position
 		updateEuclidianPosition();
 		update2DPosition();
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
@@ -242,7 +245,8 @@ public class Arm extends Model<ArmModelListener> {
 			this._q = q;
 			updateEuclidianPosition();
 			update2DPosition();
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 	/**
@@ -254,7 +258,8 @@ public class Arm extends Model<ArmModelListener> {
 			this._q = new Matrix(vecq, 1);
 			updateEuclidianPosition();
 			update2DPosition();
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 
@@ -273,7 +278,8 @@ public class Arm extends Model<ArmModelListener> {
 		if( dq.getColumnDimension() == _dq.getColumnDimension() && 
 				dq.getRowDimension() == _dq.getRowDimension()) {
 			this._dq = dq;
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 	/**
@@ -283,7 +289,8 @@ public class Arm extends Model<ArmModelListener> {
 	public void setArmSpeed(double[] vecdq) {
 		if (vecdq.length == _q.getColumnDimension()) {
 			this._dq = new Matrix(vecdq, 1);
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 

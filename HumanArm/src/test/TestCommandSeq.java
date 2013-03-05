@@ -205,7 +205,7 @@ public class TestCommandSeq {
 		// Graphical part
 		JCommandSequence seqViewer = new JCommandSequence();
 		seqViewer.add(com);
-		com.addModelListener(seqViewer);
+		com.addObserver(seqViewer);
 		frame.add( seqViewer, BorderLayout.CENTER);
 		
 		frame.setVisible(true);
@@ -220,7 +220,7 @@ public class TestCommandSeq {
 		}
 		com2.setName("com_1");
 		seqViewer.add(com2);
-		com2.addModelListener(seqViewer);
+		com2.addObserver(seqViewer);
 
 	}
 	

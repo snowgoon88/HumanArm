@@ -8,15 +8,11 @@ VERSION = 2.0
 HOMEDIR = HumanArm
 
 SRC =     model/Arm.java \
-          model/ArmModelListener.java \
           model/CompleteArm.java \
           model/NeuroControl.java \
           model/SimpleMuscle.java \
           model/Command.java \
           model/CommandSequence.java \
-          model/CommandSequenceListener.java \
-          model/Model.java \
-          model/ModelListener.java \
           utils/JamaU.java \
           utils/GraphicHelper.java \
           viewer/JArm2D.java \

@@ -12,13 +12,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Observable;
 import java.util.StringTokenizer;
 
 /**
  * @author Alain.Dutech@loria.fr
  *
  */
-public class CommandSequence extends Model<CommandSequenceListener> implements Iterable<Command> {
+public class CommandSequence extends Observable implements Iterable<Command> {
 	
 	/** List of Commands */
 	LinkedList<Command> _commands;
@@ -180,7 +181,8 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 		Collections.sort(_commands);
 		_next = null;
 		_it_com = null;
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 		return res;
 	}
 	public boolean remove(Command obj) {
@@ -188,7 +190,8 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 		Collections.sort(_commands);
 		_next = null;
 		_it_com = null;
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 		return res;
 	}
 	public void changeCommand(Command obj, double time, double val ) {
@@ -199,13 +202,15 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 		_next = null;
 		_it_com = null;
 		
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 		System.out.println(this.toString());
 	}
 	
 	public void clear() {
 		_commands.clear();
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
@@ -313,7 +318,8 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
         	lineRead = br.readLine();
         }
         Collections.sort(_commands);
-		notifyModelListeners();
+        setChanged();
+		notifyObservers();
 	}
 	/**
 	 * @return the _name
@@ -326,6 +332,7 @@ public class CommandSequence extends Model<CommandSequenceListener> implements I
 	 */
 	public void setName(String name) {
 		this._name = name;
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 	}
 }

@@ -14,6 +14,8 @@ import java.awt.RenderingHints;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -24,7 +26,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.Arm;
-import model.ArmModelListener;
 
 /**
  * Dessine le bras comme une suite de segments bleus.
@@ -37,7 +38,7 @@ import model.ArmModelListener;
  *
  */
 @SuppressWarnings("serial")
-public class JArm2D extends JPanel implements ArmModelListener {
+public class JArm2D extends JPanel implements Observer {
 	
 	/** Bounds of the model_canvas */
 	double _minX = -1.0, _maxX = 1.0;
@@ -71,8 +72,9 @@ public class JArm2D extends JPanel implements ArmModelListener {
 		_minY = minY;
 		_maxY = maxY;
 	}
+	
 	@Override
-	public void modelChanged(Arm model) {
+	public void update(Observable model, Object o) {
 		this.repaint();
 	}
 	
