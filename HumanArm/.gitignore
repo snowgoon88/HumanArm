@@ -3,4 +3,5 @@ bin/
 *.zip
 *.jar
 pyarm*
+*.class
 
