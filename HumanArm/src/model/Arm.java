@@ -310,6 +310,14 @@ public class Arm extends Observable {
 	}
 	
 	/**
+	 * Get the position the last endpoint of Arm.
+	 * @return Matrix of the last endpoint arm position 
+	 */
+	public Matrix getArmEndPointMatrix() {
+		return JamaU.Point3dToMatrix(getArmEndPoint());
+	}
+
+	/**
 	 * Get the x-positions of base and segment endpoints of Arm.
 	 * @return _posX
 	 */
