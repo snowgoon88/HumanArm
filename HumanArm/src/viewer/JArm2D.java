@@ -25,6 +25,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import Jama.Matrix;
+
 import model.Arm;
 
 /**
@@ -54,6 +56,12 @@ public class JArm2D extends JPanel implements Observer {
 	/** Display Memory */
 	boolean _fg_memory = true;
 	
+	/** Position of the goal */
+	double _goalX = 0.0, _goalY = 0.0;
+	/** Radius of Goal for displaying */
+	int _goalRadius = 2;
+	/** Display goals */
+	boolean _fg_goal = true;
 	
 	public JArm2D( Arm model ) {
 		super();
@@ -75,6 +83,13 @@ public class JArm2D extends JPanel implements Observer {
 	
 	@Override
 	public void update(Observable model, Object o) {
+		if (o != null && o instanceof Matrix) {
+			Matrix goal = (Matrix)o;
+			_goalX = goal.get(0, 0);
+			_goalY = goal.get(0, 1);
+			System.out.println("Goal : " + _goalX + " " + _goalY);
+		}
+		
 		this.repaint();
 	}
 	
@@ -89,7 +104,16 @@ public class JArm2D extends JPanel implements Observer {
         g.drawLine(xWin(0.0),yWin(-1.0), xWin(0.0), yWin(1.0) );
         // Bras
         drawArm(g);
+        
+        // But
+        if (_fg_goal) drawGoal(g);
     }
+	
+	/** Draw a circle centered on the goal */
+	private void drawGoal(Graphics g) {
+		g.drawOval(xWin(_goalX)-_goalRadius, yWin(_goalY)-2, 4,4);
+	}
+	
 	/** Draw Arm as a sequence of lines */
 	private void drawArm(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
@@ -184,6 +208,27 @@ public class JArm2D extends JPanel implements Observer {
 		_endY.add(y);
 	}
 	
+	/**
+	 * Set the goal position
+	 * @param x
+	 * @param y
+	 */
+	public void setGoal(double x, double y) {
+		this._goalX = x;
+		this._goalY = y;
+	}
+	
+	/**
+	 * Decide if Goal is drawn on JPanel
+	 */
+	public void setGoalDrawn(boolean drawGoal) {
+		this._fg_goal = drawGoal;
+	}
+	
+	public boolean isGoalDrawn() {
+		return _fg_goal;
+	}
+	
 	public JPanel getControlPanel() {
 		return new JArmControl();
 	}
@@ -192,6 +237,17 @@ public class JArm2D extends JPanel implements Observer {
 	 */
 	class JArmControl extends JPanel {
 		public JArmControl() {
+			// JCheckBox for drawing Memory
+			JCheckBox goalCheck = new JCheckBox("But");
+			goalCheck.setSelected(isGoalDrawn());
+			goalCheck.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					setGoalDrawn(e.getStateChange() == ItemEvent.SELECTED);
+				}
+			});
+			add(goalCheck);
+			
 			// JCheckBox for drawing Memory
 			JCheckBox memCheck = new JCheckBox("Mémoire");
 			memCheck.setSelected(isMemoryDrawn());
