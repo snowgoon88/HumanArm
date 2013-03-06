@@ -397,7 +397,7 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	}
 
 	@Override
-	public void modelChanged(CommandSequence model) {
+	public void update(CommandSequence model) {
 		// TODO Auto-generated method stub
 		// find the trace
 		int index = _comList.indexOf(model);
@@ -406,7 +406,7 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 			updateTrace(_selectTrace, model);
 		}
 		else {
-			System.err.println("[CommandSequence.modelChanged] model not found.");
+			System.err.println("[CommandSequence.update] model not found.");
 		}
 	}
 	
