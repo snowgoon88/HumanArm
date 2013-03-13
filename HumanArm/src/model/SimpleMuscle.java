@@ -96,6 +96,8 @@ public class SimpleMuscle {
 		_vn = computeSpeed(angles, angSpeed);
 		// tension (force)
 		for (int col = 0; col < _tn.getColumnDimension(); col++) {
+			assert act.get(0, col) >= 0.0 : "_act < 0";
+			assert act.get(0, col) <= 1.0 : "_act > 1";
 			double t = funA(act.get(0,col),_ln.get(0,col))*
 				(funFl(_ln.get(0,col))*funFv(_ln.get(0,col),_vn.get(0,col))
 				+funFp(_ln.get(0,col)));
