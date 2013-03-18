@@ -70,10 +70,7 @@ public class Arm extends Observable {
 	
 	/** Bound for values */
 	boolean _fg_bounded = true;
-	double _mind2q = -128. * Math.PI; double _maxd2q = 128 * Math.PI;
-	double _mindq = -8. * Math.PI;    double _maxdq = 8 * Math.PI;
-	double[] _minq = {Math.toRadians(-30), Math.toRadians(0)};
-	double[] _maxq = {Math.toRadians(140),   Math.toRadians(160)};
+	ArmConstraints _constraints = new ArmConstraints();
 	
 	/**
 	 * Constructor with default initialization. 
@@ -171,21 +168,21 @@ public class Arm extends Observable {
 		_d2q = _d2q.transpose();
 		if (_fg_bounded) {
 			for (int i = 0; i < _d2q.getColumnDimension(); i++) {
-				_d2q.set(0, i, Math.min(Math.max(_d2q.get(0, i), _mind2q), _maxd2q)); 
+				_d2q.set(0, i, Math.min(Math.max(_d2q.get(0, i), _constraints._mind2q), _constraints._maxd2q));
 			}
 		}
 		// then update speed
 		_dq = _dq.plus(_d2q.times(dt));
 		if (_fg_bounded) {
 			for (int i = 0; i < _dq.getColumnDimension(); i++) {
-				_dq.set(0, i, Math.min(Math.max(_dq.get(0, i), _mindq), _maxdq)); 
+				_dq.set(0, i, Math.min(Math.max(_dq.get(0, i), _constraints._mindq), _constraints._maxdq));
 			}
 		}
 		// then position
 		_q = _q.plus(_dq.times(dt));
 		if (_fg_bounded) {
 			for (int i = 0; i < _q.getColumnDimension(); i++) {
-				_q.set(0, i, Math.min(Math.max(_q.get(0, i), _minq[i]), _maxq[i])); 
+				_q.set(0, i, Math.min(Math.max(_q.get(0, i), _constraints._minq[i]), _constraints._maxq[i]));
 			}
 		}
 		
@@ -344,5 +341,19 @@ public class Arm extends Observable {
 	 */
 	public double getArmEndPointY() {
 		return _posY[_posY.length-1];
+	}
+	/**
+	 * Get the constraints apply on the arm (boundaries).
+	 * @return _contraints
+	 */
+	public ArmConstraints getConstraints() {
+		return _constraints;
+	}
+	/**
+	 * Change the arm constraints (boundaries).
+	 * @param constraints
+	 */
+	public void setConstraints(ArmConstraints constraints) {
+		this._constraints = constraints;
 	}
 }
