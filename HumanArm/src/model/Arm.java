@@ -356,4 +356,9 @@ public class Arm extends Observable {
 	public void setConstraints(ArmConstraints constraints) {
 		this._constraints = constraints;
 	}
+
+	public double[] getLength() {
+		return _l;
+	}
+
 }
