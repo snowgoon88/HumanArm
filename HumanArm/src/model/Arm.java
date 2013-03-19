@@ -349,4 +349,9 @@ public class Arm extends Model<ArmModelListener> {
 	public void setConstraints(ArmConstraints constraints) {
 		this._constraints = constraints;
 	}
+
+	public double[] getLength() {
+		return _l;
+	}
+
 }

@@ -62,6 +62,9 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	/** Display goals */
 	boolean _fg_goal = true;
 	
+	/** Display the reaching area */
+	boolean _fg_reaching = false;
+
 	public JArm2D( Arm model ) {
 		super();
 		_arm = model;
@@ -99,15 +102,60 @@ public class JArm2D extends JPanel implements ArmModelListener {
         // Essayer de tracer une croix -1,1; -1,1
         g.drawLine(xWin(-1.0),yWin(0.0), xWin(1.0), yWin(0.0) );
         g.drawLine(xWin(0.0),yWin(-1.0), xWin(0.0), yWin(1.0) );
+
+        // Zone accessible
+        if (_fg_reaching) drawReachingArea(g);
+
         // Bras
         drawArm(g);
         
         // But
         if (_fg_goal) drawGoal(g);
     }
-	
+
+	/** Draw the reaching area */
+	private void drawReachingArea(Graphics g) {
+		g.setColor(Color.LIGHT_GRAY);
+
+		final double l0 = _arm.getLength()[0];
+		final double l1 = _arm.getLength()[1];
+
+		double centre_x = 0;
+		double centre_y = 0;
+
+		this.drawArc(g, 0, 0, (l0 + l1), -30, 170);
+
+		centre_x = l0 * Math.cos(Math.toRadians(-30));
+		centre_y = l0 * Math.sin(Math.toRadians(-30));
+		this.drawArc(g, centre_x, centre_y, l1, -30, 160);
+
+		centre_x = l0 * Math.cos(Math.toRadians(140));
+		centre_y = l0 * Math.sin(Math.toRadians(140));
+		this.drawArc(g, centre_x, centre_y, l1, 140, 160);
+
+		// Thx Al-Kashi
+		// double c_2 = l0*l0 + l1*l1 -
+		// 2*l0*l1*Math.cos(Math.toRadians(180-160));
+		// radius = Math.sqrt(c_2);
+		// startAngle =
+		// (Math.toDegrees(Math.acos((l1*l1-c_2-l0*l0)/-2*radius*l1))-20);
+		// arcAngle = 140 + 30;
+		this.drawArc(g, 0, 0, 0.123, 70, 170);
+	}
+
+	/** Draw an arc the the center of the circle q*/
+	private void drawArc(Graphics g, double centre_x, double centre_y,
+			double radius, int startAngle, int arcAngle) {
+		int x = xWin(centre_x - radius);
+		int y = yWin(centre_y + radius);
+		int width = xWin(centre_x + radius) - x;
+		int height = yWin(centre_y - radius) - y;
+		g.drawArc(x, y, width, height, startAngle, arcAngle);
+	}
+
 	/** Draw a circle centered on the goal */
 	private void drawGoal(Graphics g) {
+		g.setColor(Color.RED);
 		g.drawOval(xWin(_goalX)-_goalRadius, yWin(_goalY)-2, 4,4);
 	}
 	
@@ -226,6 +274,13 @@ public class JArm2D extends JPanel implements ArmModelListener {
 		return _fg_goal;
 	}
 	
+	public boolean isReachingAreaDrawn() {
+		return _fg_reaching;
+	}
+	public void setReachingAreaDrawn(boolean drawnReachingArea) {
+		this._fg_reaching = drawnReachingArea;
+	}
+
 	public JPanel getControlPanel() {
 		return new JArmControl();
 	}
@@ -234,7 +289,18 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	 */
 	class JArmControl extends JPanel {
 		public JArmControl() {
-			// JCheckBox for drawing Memory
+			// JCheckBox for drawing Reaching Area
+			JCheckBox reachingCheck = new JCheckBox("Zone");
+			reachingCheck.setSelected(isReachingAreaDrawn());
+			reachingCheck.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					setReachingAreaDrawn(e.getStateChange() == ItemEvent.SELECTED);
+				}
+			});
+			add(reachingCheck);
+
+			// JCheckBox for drawing Goal
 			JCheckBox goalCheck = new JCheckBox("But");
 			goalCheck.setSelected(isGoalDrawn());
 			goalCheck.addItemListener(new ItemListener() {
