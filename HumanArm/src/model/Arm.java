@@ -354,4 +354,58 @@ public class Arm extends Model<ArmModelListener> {
 		return _l;
 	}
 
+	/**
+	 * Test if a position (x,y) is reachable by the arm or not.
+	 * 
+	 * @param x the X-coordinate of the point to test
+	 * @param y the Y-coordinate of the point to test
+	 * @return true if the point is reachable, false if not.
+	 * 
+	 * TODO: avoid magic number compute from the arm characteristics.
+	 */
+	public boolean isPointReachable(double x, double y) {
+		final double l1_2 = _l[1]*_l[1];
+
+		// In Big cicle and out little circle
+		double r = x * x + y * y;
+		if (r > (_l[0] + _l[1]) * (_l[0] + _l[1]) || r < 0.123 * 0.123)
+			return false;
+
+		// In right circle
+		double p_x = _l[0] * Math.cos(_constraints._minq[0]);
+		double p_y = _l[0] * Math.sin(_constraints._minq[0]);
+		r = (x - p_x) * (x - p_x) + (y - p_y) * (y - p_y);
+		if (r < l1_2)
+			return false;
+
+		// In left circle
+		p_x = _l[0] * Math.cos(_constraints._maxq[0]);
+		p_y = _l[0] * Math.sin(_constraints._maxq[0]);
+		r = (x - p_x) * (x - p_x) + (y - p_y) * (y - p_y);
+		if (r < l1_2)
+			return true;
+
+		// In the range of (140:-30) degrees
+		// Compute the angle in polar coordinate system
+		double theta = 0.0;
+		if (x > 0)
+			if (y >= 0)
+				theta = Math.atan(y / x);
+			else
+				theta = Math.atan(y / x) + 2.0 * Math.PI;
+		else if (x < 0)
+			theta = Math.atan(y / x) + Math.PI;
+		else if (y > 0) // x == 0.0;
+			theta = Math.PI / 2.0;
+		else
+			theta = Math.PI * 3.0 / 2.0;
+		theta = Math.toDegrees(theta);
+
+		if (theta > (_constraints._maxq[0] + 360) % 360
+				&& theta < (_constraints._minq[0] + 360) % 360)
+			return false;
+
+		// Else in the figure
+		return true;
+	}
 }

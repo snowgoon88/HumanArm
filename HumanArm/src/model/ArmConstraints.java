@@ -10,8 +10,10 @@ package model;
  */
 public class ArmConstraints {
 
-	double _mind2q = -128. * Math.PI; double _maxd2q = 128 * Math.PI;
-	double _mindq = -8. * Math.PI;    double _maxdq = 8 * Math.PI;
-	double[] _minq = {Math.toRadians(-30), Math.toRadians(0)};
-	double[] _maxq = {Math.toRadians(140),   Math.toRadians(160)};
+	public double _mind2q = -128. * Math.PI;
+	public double _maxd2q = 128. * Math.PI;
+	public double _mindq = -8. * Math.PI;
+	public double _maxdq = 8. * Math.PI;
+	public double[] _minq = { Math.toRadians(-30), Math.toRadians(0) };
+	public double[] _maxq = { Math.toRadians(140), Math.toRadians(160) };
 }
