@@ -34,7 +34,6 @@ import model.Arm;
  * Les axes sont aussi dessiné entre -1 et 1.
  * 
  * TODO Garder posX et posY ou passer aux Point3d ?
- * TODO Tenter MVC ?
  * 
  * @author alain.dutech@loria.fr
  *
@@ -59,7 +58,7 @@ public class JArm2D extends JPanel implements Observer {
 	/** Position of the goal */
 	double _goalX = 0.0, _goalY = 0.0;
 	/** Radius of Goal for displaying */
-	int _goalRadius = 2;
+	double _goalRadius = 0.01;
 	/** Display goals */
 	boolean _fg_goal = true;
 	
@@ -116,7 +115,10 @@ public class JArm2D extends JPanel implements Observer {
         if (_fg_goal) drawGoal(g);
     }
 
-	/** Draw the reaching area */
+	/** Draw the reaching area.
+	 * 
+	 * TODO: avoid magic number compute from the arm characteristics.
+	 */
 	private void drawReachingArea(Graphics g) {
 		g.setColor(Color.LIGHT_GRAY);
 
@@ -125,15 +127,18 @@ public class JArm2D extends JPanel implements Observer {
 
 		double centre_x = 0;
 		double centre_y = 0;
+		double angle = 0;
 
 		this.drawArc(g, 0, 0, (l0 + l1), -30, 170);
 
-		centre_x = l0 * Math.cos(Math.toRadians(-30));
-		centre_y = l0 * Math.sin(Math.toRadians(-30));
+		angle = _arm.getConstraints()._minq[0];
+		centre_x = l0 * Math.cos(angle);
+		centre_y = l0 * Math.sin(angle);
 		this.drawArc(g, centre_x, centre_y, l1, -30, 160);
 
-		centre_x = l0 * Math.cos(Math.toRadians(140));
-		centre_y = l0 * Math.sin(Math.toRadians(140));
+		angle = _arm.getConstraints()._maxq[0];
+		centre_x = l0 * Math.cos(angle);
+		centre_y = l0 * Math.sin(angle);
 		this.drawArc(g, centre_x, centre_y, l1, 140, 160);
 
 		// Thx Al-Kashi
@@ -158,8 +163,11 @@ public class JArm2D extends JPanel implements Observer {
 
 	/** Draw a circle centered on the goal */
 	private void drawGoal(Graphics g) {
-		g.setColor(Color.RED);
-		g.drawOval(xWin(_goalX)-_goalRadius, yWin(_goalY)-2, 4,4);
+		if (_arm.isPointReachable(_goalX, _goalY))
+			g.setColor(Color.GREEN);
+		else
+			g.setColor(Color.RED);
+		drawArc(g, _goalX, _goalY, _goalRadius, 0, 360);
 	}
 	
 	/** Draw Arm as a sequence of lines */
