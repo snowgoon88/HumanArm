@@ -28,6 +28,7 @@ import javax.swing.event.ChangeListener;
 import Jama.Matrix;
 
 import model.Arm;
+import model.ArmConstraints;
 
 /**
  * Dessine le bras comme une suite de segments bleus.
@@ -115,50 +116,69 @@ public class JArm2D extends JPanel implements Observer {
         if (_fg_goal) drawGoal(g);
     }
 
-	/** Draw the reaching area.
-	 * 
-	 * TODO: avoid magic number compute from the arm characteristics.
+	/**
+	 * Draw the reaching area.
 	 */
 	private void drawReachingArea(Graphics g) {
 		g.setColor(Color.LIGHT_GRAY);
 
 		final double l0 = _arm.getLength()[0];
 		final double l1 = _arm.getLength()[1];
+		final double l0_2 = l0 * l0;
+		final double l1_2 = l1 * l1;
+
+		final ArmConstraints ac = _arm.getConstraints();
 
 		double centre_x = 0;
 		double centre_y = 0;
 		double angle = 0;
+		double radius = 0;
+		double startAngle = 0;
+		double arcAngle = 0;
 
-		this.drawArc(g, 0, 0, (l0 + l1), -30, 170);
+		double l2_2 = l0_2 + l1_2 - 2 * l0 * l1
+				* Math.cos(Math.PI - ac._minq[1]);
+		radius = Math.sqrt(l2_2);
+		startAngle = ac._minq[0];
+		arcAngle = ac._maxq[0] - ac._minq[0];
+		this.drawArc(g, 0, 0, radius, startAngle, arcAngle);
 
 		angle = _arm.getConstraints()._minq[0];
 		centre_x = l0 * Math.cos(angle);
 		centre_y = l0 * Math.sin(angle);
-		this.drawArc(g, centre_x, centre_y, l1, -30, 160);
+		radius = l1;
+		startAngle = ac._minq[0];
+		arcAngle = ac._maxq[1] - ac._minq[1];
+		this.drawArc(g, centre_x, centre_y, radius, startAngle, arcAngle);
 
 		angle = _arm.getConstraints()._maxq[0];
 		centre_x = l0 * Math.cos(angle);
 		centre_y = l0 * Math.sin(angle);
-		this.drawArc(g, centre_x, centre_y, l1, 140, 160);
+		radius = l1;
+		startAngle = ac._maxq[0];
+		arcAngle = ac._maxq[1] - ac._minq[1];
+		this.drawArc(g, centre_x, centre_y, radius, startAngle, arcAngle);
 
-		// Thx Al-Kashi
-		// double c_2 = l0*l0 + l1*l1 -
-		// 2*l0*l1*Math.cos(Math.toRadians(180-160));
-		// radius = Math.sqrt(c_2);
-		// startAngle =
-		// (Math.toDegrees(Math.acos((l1*l1-c_2-l0*l0)/-2*radius*l1))-20);
-		// arcAngle = 140 + 30;
-		this.drawArc(g, 0, 0, 0.123, 70, 170);
+		l2_2 = l0_2 + l1_2 - 2 * l0 * l1 * Math.cos(Math.PI - ac._maxq[1]);
+		radius = Math.sqrt(l2_2);
+		startAngle = Math.acos((l1_2 - l2_2 - l0_2) / (-2 * radius * l1))
+				+ ac._minq[0];
+		arcAngle = ac._maxq[0] - ac._minq[0];
+		this.drawArc(g, 0, 0, radius, startAngle, arcAngle);
 	}
 
-	/** Draw an arc the the center of the circle q*/
+	/** 
+	 * Draw an arc the the center of the circle q
+	 * With starAngle and arcAngle in radian
+	 */
 	private void drawArc(Graphics g, double centre_x, double centre_y,
-			double radius, int startAngle, int arcAngle) {
+			double radius, double startAngle, double arcAngle) {
 		int x = xWin(centre_x - radius);
 		int y = yWin(centre_y + radius);
 		int width = xWin(centre_x + radius) - x;
 		int height = yWin(centre_y - radius) - y;
-		g.drawArc(x, y, width, height, startAngle, arcAngle);
+		g.drawArc(x, y, width, height, (int) Math.toDegrees(startAngle),
+				(int) Math.toDegrees(arcAngle));
 	}
 
 	/** Draw a circle centered on the goal */
