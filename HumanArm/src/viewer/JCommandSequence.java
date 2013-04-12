@@ -19,6 +19,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -32,18 +34,16 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
-import utils.GraphicHelper;
-
 import model.Command;
 import model.CommandSequence;
-import model.CommandSequenceListener;
+import utils.GraphicHelper;
 
 /**
  * @author alain.dutech@loria.fr
  *
  */
 @SuppressWarnings("serial")
-public class JCommandSequence extends JPanel implements CommandSequenceListener {
+public class JCommandSequence extends JPanel implements Observer {
 
 	/** The actual graph */
 	Chart2D _chart;
@@ -397,16 +397,19 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 	}
 
 	@Override
-	public void modelChanged(CommandSequence model) {
-		// TODO Auto-generated method stub
-		// find the trace
-		int index = _comList.indexOf(model);
-		if (index >= 0) {
-			_selectTrace = _traces.get(index);
-			updateTrace(_selectTrace, model);
-		}
-		else {
-			System.err.println("[CommandSequence.modelChanged] model not found.");
+	public void update(Observable model, Object o) {
+		if (model instanceof CommandSequence) {
+			CommandSequence com = (CommandSequence) model;
+			// find the trace
+			int index = _comList.indexOf(com);
+			if (index >= 0) {
+				_selectTrace = _traces.get(index);
+				updateTrace(_selectTrace, com);
+			} else {
+				System.err.println("[CommandSequence.update] model not found.");
+			}
+		} else {
+			System.err.println("[CommandSequence.update] model not of type CommandSequence.");
 		}
 	}
 	

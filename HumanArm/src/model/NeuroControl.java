@@ -40,9 +40,12 @@ public class NeuroControl {
 	 * Applique une consigne/commande d'activation pendant dt secondes.
 	 * @param u : consigne (dans [0,1])
 	 * @param dt : intervalle en s
-	 * @return _act : valeur actuelle d'activation.
+	 * @return _act : valeur actuelle d'activation dans [0:1].
 	 */
 	public double applyCommand( double u, double dt) {
+		assert u >= 0.0 : "u < 0";
+		assert u <= 1.0 : "u > 1";
+
 		_u = u;
 		// compute d_a/dt
 		double da = ((1 + rd.nextGaussian()*_sigma) * _u - _act);
@@ -55,7 +58,11 @@ public class NeuroControl {
 		//System.out.println("da="+da);
 		// update _act
 		_act = _act + da * dt;
-		
+
+		// check boundaries
+		if (_act < 0.0) _act = 0.0;
+		else if (_act > 1.0) _act = 1.0;
+
 		return _act;
 	}
 

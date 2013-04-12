@@ -4,10 +4,12 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Observable;
 
 import javax.vecmath.Point3d;
-import Jama.Matrix;
+
 import utils.JamaU;
+import Jama.Matrix;
 
 
 /**
@@ -29,7 +31,7 @@ import utils.JamaU;
  * 
  * @author Alain.Dutech@loria.fr
  */
-public class Arm extends Model<ArmModelListener> {
+public class Arm extends Observable {
 	
 	/** Dimension of the state space */
 	static int _dimQ = 2;
@@ -68,10 +70,7 @@ public class Arm extends Model<ArmModelListener> {
 	
 	/** Bound for values */
 	boolean _fg_bounded = true;
-	double _mind2q = -128. * Math.PI; double _maxd2q = 128 * Math.PI;
-	double _mindq = -8. * Math.PI;    double _maxdq = 8 * Math.PI;
-	double[] _minq = {Math.toRadians(-30), Math.toRadians(0)};
-	double[] _maxq = {Math.toRadians(140),   Math.toRadians(160)};
+	ArmConstraints _constraints = new ArmConstraints();
 	
 	/**
 	 * Constructor with default initialization. 
@@ -169,28 +168,29 @@ public class Arm extends Model<ArmModelListener> {
 		_d2q = _d2q.transpose();
 		if (_fg_bounded) {
 			for (int i = 0; i < _d2q.getColumnDimension(); i++) {
-				_d2q.set(0, i, Math.min(Math.max(_d2q.get(0, i), _mind2q), _maxd2q)); 
+				_d2q.set(0, i, Math.min(Math.max(_d2q.get(0, i), _constraints._mind2q), _constraints._maxd2q));
 			}
 		}
 		// then update speed
 		_dq = _dq.plus(_d2q.times(dt));
 		if (_fg_bounded) {
 			for (int i = 0; i < _dq.getColumnDimension(); i++) {
-				_dq.set(0, i, Math.min(Math.max(_dq.get(0, i), _mindq), _maxdq)); 
+				_dq.set(0, i, Math.min(Math.max(_dq.get(0, i), _constraints._mindq), _constraints._maxdq));
 			}
 		}
 		// then position
 		_q = _q.plus(_dq.times(dt));
 		if (_fg_bounded) {
 			for (int i = 0; i < _q.getColumnDimension(); i++) {
-				_q.set(0, i, Math.min(Math.max(_q.get(0, i), _minq[i]), _maxq[i])); 
+				_q.set(0, i, Math.min(Math.max(_q.get(0, i), _constraints._minq[i]), _constraints._maxq[i]));
 			}
 		}
 		
 		// then update euclidian position
 		updateEuclidianPosition();
 		update2DPosition();
-		notifyModelListeners();
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
@@ -242,7 +242,8 @@ public class Arm extends Model<ArmModelListener> {
 			this._q = q;
 			updateEuclidianPosition();
 			update2DPosition();
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 	/**
@@ -254,7 +255,8 @@ public class Arm extends Model<ArmModelListener> {
 			this._q = new Matrix(vecq, 1);
 			updateEuclidianPosition();
 			update2DPosition();
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 
@@ -273,7 +275,8 @@ public class Arm extends Model<ArmModelListener> {
 		if( dq.getColumnDimension() == _dq.getColumnDimension() && 
 				dq.getRowDimension() == _dq.getRowDimension()) {
 			this._dq = dq;
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 	/**
@@ -283,7 +286,8 @@ public class Arm extends Model<ArmModelListener> {
 	public void setArmSpeed(double[] vecdq) {
 		if (vecdq.length == _q.getColumnDimension()) {
 			this._dq = new Matrix(vecdq, 1);
-			notifyModelListeners();
+			setChanged();
+			notifyObservers();
 		}
 	}
 
@@ -302,6 +306,14 @@ public class Arm extends Model<ArmModelListener> {
 		return _pos.get(_pos.size()-1);
 	}
 	
+	/**
+	 * Get the position the last endpoint of Arm.
+	 * @return Matrix of the last endpoint arm position 
+	 */
+	public Matrix getArmEndPointMatrix() {
+		return JamaU.Point3dToMatrix(getArmEndPoint());
+	}
+
 	/**
 	 * Get the x-positions of base and segment endpoints of Arm.
 	 * @return _posX
@@ -329,5 +341,70 @@ public class Arm extends Model<ArmModelListener> {
 	 */
 	public double getArmEndPointY() {
 		return _posY[_posY.length-1];
+	}
+	/**
+	 * Get the constraints apply on the arm (boundaries).
+	 * @return _contraints
+	 */
+	public ArmConstraints getConstraints() {
+		return _constraints;
+	}
+	/**
+	 * Change the arm constraints (boundaries).
+	 * @param constraints
+	 */
+	public void setConstraints(ArmConstraints constraints) {
+		this._constraints = constraints;
+	}
+
+	public double[] getLength() {
+		return _l;
+	}
+
+	/**
+	 * Test if a position (x,y) is reachable by the arm or not.
+	 * 
+	 * @param x the X-coordinate of the point to test
+	 * @param y the Y-coordinate of the point to test
+	 * @return true if the point is reachable, false if not.
+	 */
+	public boolean isPointReachable(double x, double y) {
+		final double l0_2 = _l[0] * _l[0];
+		final double l1_2 = _l[1] * _l[1];
+
+		// In Big cicle
+		double r = x * x + y * y;
+		if (r > (_l[0] + _l[1]) * (_l[0] + _l[1]))
+			return false;
+
+		// Out of the little circle, thanks Al-Kashi
+		double c_2 = l0_2 + l1_2 - 2 * _l[0] * _l[1]
+				* Math.cos(Math.PI - _constraints._maxq[1]);
+		if (r < c_2)
+			return false;
+
+		// In right circle
+		double p_x = _l[0] * Math.cos(_constraints._minq[0]);
+		double p_y = _l[0] * Math.sin(_constraints._minq[0]);
+		r = (x - p_x) * (x - p_x) + (y - p_y) * (y - p_y);
+		if (r < l1_2)
+			return false;
+
+		// In left circle
+		p_x = _l[0] * Math.cos(_constraints._maxq[0]);
+		p_y = _l[0] * Math.sin(_constraints._maxq[0]);
+		r = (x - p_x) * (x - p_x) + (y - p_y) * (y - p_y);
+		if (r < l1_2)
+			return true;
+
+		// In the range of (140:-30) degrees
+		// Compute the angle in polar coordinate system
+		double theta = Math.atan2(x, y);
+
+		if (theta > _constraints._maxq[0] && theta < _constraints._minq[0])
+			return false;
+
+		// Else in the figure
+		return true;
 	}
 }

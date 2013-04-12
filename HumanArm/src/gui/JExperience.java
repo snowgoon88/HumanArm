@@ -89,8 +89,8 @@ public class JExperience extends JPanel {
 		leftPanel.add(_jArm.getControlPanel(), BorderLayout.SOUTH);
 		JArmLabel jArmInfo = new JArmLabel(_compArm.getArm());
 		leftPanel.add(jArmInfo, BorderLayout.NORTH);
-		_compArm.getArm().addModelListener(_jArm);
-		_compArm.getArm().addModelListener(jArmInfo);
+		_compArm.getArm().addObserver(_jArm);
+		_compArm.getArm().addObserver(jArmInfo);
 		
 		// Right : Tabs of Chart2D
 		splitPane.setLeftComponent(leftPanel);
@@ -237,7 +237,7 @@ public class JExperience extends JPanel {
 	 */
 	public void addConsigne( CommandSequence consigne ) {
 		_comSeqViewer.add( consigne );
-		consigne.addModelListener(_comSeqViewer);
+		consigne.addObserver(_comSeqViewer);
 
 		repaint();
 	}
