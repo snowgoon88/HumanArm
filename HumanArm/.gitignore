@@ -1,5 +1,7 @@
 # What to ignore
 bin/
+build/
+dist/
 *.zip
 *.jar
 pyarm*
