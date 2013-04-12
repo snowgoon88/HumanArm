@@ -3,6 +3,7 @@ bin/
 *.zip
 *.jar
 pyarm*
+*.class
 
 /.settings
 /.classpath
