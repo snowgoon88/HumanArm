@@ -34,6 +34,7 @@ import javax.swing.JSeparator;
 
 import utils.GraphicHelper;
 
+import model.Arm;
 import model.Command;
 import model.CommandSequence;
 import model.CommandSequenceListener;
@@ -408,6 +409,10 @@ public class JCommandSequence extends JPanel implements CommandSequenceListener 
 		else {
 			System.err.println("[CommandSequence.update] model not found.");
 		}
+	}
+	@Override
+	public void update(CommandSequence model, Object o) {
+		update(model);
 	}
 	
 	/**

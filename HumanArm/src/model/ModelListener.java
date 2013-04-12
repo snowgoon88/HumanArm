@@ -12,5 +12,6 @@ package model;
  */
 public interface ModelListener <M>
 {
+	void update (M model);
     void update (M model, Object o);
 }

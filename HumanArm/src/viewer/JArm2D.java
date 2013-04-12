@@ -94,6 +94,11 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	}
 	
 	@Override
+	public void update(Arm model) {
+		update(model, null);
+	}
+	
+	@Override
 	public void paintComponent(Graphics g) {
         super.paintComponent(g);       
         

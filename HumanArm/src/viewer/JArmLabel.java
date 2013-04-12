@@ -44,4 +44,11 @@ public class JArmLabel extends JLabel implements ArmModelListener {
 	public void update(Arm model) {
 		setText(getDisplayString());
 	}
+
+	@Override
+	public void update(Arm model, Object o) {
+		update(model);
+		
+	}
+	
 }
