@@ -33,8 +33,8 @@ pour simuler le bras et stocker toutes les variables dans le fichier
 Une application "complète" avec interface graphique permet d'expérimenter un peu
 avec le bras ('gui/ExpGUI'). Lire les commentaires dans 'gui/ExpGui'.
 
-Compiler et exécuter
-====================
+Compiler et exécuter avec make
+==============================
 Ce qui suit suppose que les librairies dont dépend 'HumanArm' (voir section
 suivante) sont dans le répertoire 'libs'. Si ce n'est pas le cas, il faut
 s'adapter en conséquence.
