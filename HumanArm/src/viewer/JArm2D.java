@@ -130,14 +130,16 @@ public class JArm2D extends JPanel implements ArmModelListener {
 	 * @return window x 
 	 */
 	private int xWin( double x) {
-		return (int) ((x - _minX)/(_maxX-_minX) * _size.width);
+		double size = Math.min(_size.width, _size.height);
+		return (int) ((x - _minX)/(_maxX-_minX) * size);
 	}
 	/**
 	 * Compute the y_window_point from the y_model_point
 	 * @return window y 
 	 */
 	private int yWin( double y) {
-		return (int) (_size.height - (y - _minY)/(_maxY-_minY) * _size.height);
+		double size = Math.min(_size.width, _size.height);
+		return (int) (size - (y - _minY)/(_maxY-_minY) * size);
 	}
 	
 	/**
