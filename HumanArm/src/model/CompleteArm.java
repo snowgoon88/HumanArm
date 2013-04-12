@@ -105,10 +105,30 @@ public class CompleteArm {
 	 * @return Positions des articulations et de l'extrémité du bras après dt.
 	 */
 	public ArrayList<Point3d> applyActivation( Matrix act, double dt ) {
+		assert checkBounds(act) : "activation out of bounds [0:1]";
 		_muscles.computeTorque(act, _arm.getArmPos(), _arm.getArmSpeed());
 		
 		return applyTorque(_muscles.getTorque(), dt);
 	}
+
+	/**
+	 * Verify if the values of a Matrix are in the bounds [0:1].
+	 *
+	 * @param act the Matrix to check
+	 * @return true if the values Matrix in [0:1], false otherwise.
+	 */
+	private boolean checkBounds(Matrix act) {
+		for (int i=0; i < act.getRowDimension(); i++) {
+			for (int j = 0; j < act.getColumnDimension(); j++) {
+				double val = act.get(i, j);
+				if (val < 0.0 || val > 1.0) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Applique une nouvelle consigne neuronale (dans [0,1]), pour chaque muscle.
 	 * Cette consigne est appliquée pendant dt.

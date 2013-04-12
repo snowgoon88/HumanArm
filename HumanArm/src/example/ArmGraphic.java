@@ -51,8 +51,8 @@ public class ArmGraphic {
 		_jInfo = new JArmLabel(_arm.getArm());
 		_frame.add(_jInfo, BorderLayout.NORTH);
 		
-		_arm.getArm().addModelListener(_jArm);
-		_arm.getArm().addModelListener(_jInfo);
+		_arm.getArm().addObserver(_jArm);
+		_arm.getArm().addObserver(_jInfo);
 		
 		_frame.setVisible(true);
 	}

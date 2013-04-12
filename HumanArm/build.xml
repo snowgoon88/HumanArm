@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project name="HumanArm" default="compile" basedir=".">
+  <description>
+Java model of a simple HumanArm as used by Li06, Martin11, etc
+</description>
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist" location="dist"/>
+  <property name="libs" location="libs"/>
+  <!-- Classpath of external jars-->
+  <path id="classpath">
+<!--    <pathelement path="$(classpath)"/> -->
+    <fileset dir="${libs}" includes="*.jar"/>
+    <pathelement location="${build}"/>
+  </path>
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+  <target name="compile" depends="init" description="compile the source ">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" classpathref="classpath"/>
+  </target>
+  <target name="dist" depends="compile" description="generate the distribution">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+    <!-- Put everything in ${build} into the HumanArm-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/lib/HumanArm-${DSTAMP}.jar" basedir="${build}"/>
+  </target>
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+	<!-- Execute Main -->
+	<target name="rgui" description="" depends="compile">
+		<java classname="gui.ExpGUI" fork="true" classpathref="classpath"/>
+	</target>
+	<target name="re" description="" depends="compile">
+		<java classname="example.ExperienceConsole" fork="true" classpathref="classpath"/>
+	</target>
+	<target name="rc" description="" depends="compile">
+		<java classname="example.ArmConsole" fork="true" classpathref="classpath"/>
+	</target>
+<target name="rg" description="" depends="compile">
+		<java classname="example.ArmGraphic" fork="true" classpathref="classpath"/>
+	</target>
+</project>
