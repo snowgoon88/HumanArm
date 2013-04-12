@@ -62,4 +62,8 @@ rc:
 rg:	
 	java -cp libs/jama-1.0.2.jar:libs/jchart2d-3.2.2.jar:libs/vecmath-1.5.2.jar:src example/ArmGraphic
 
-	
+# Regle pour nettoyer les binaires compiles (.class)
+.PHONY: clean
+clean:
+	make -C src clean
+

@@ -57,7 +57,15 @@ public class Model <L extends ModelListener> {
 	@SuppressWarnings("unchecked")
 	public void notifyModelListener (final L listener)
 	{
-		listener.modelChanged (this);
+	    listener.update (this, null);
+	}
+	/** 
+	 * Notify given Listener.
+	 */
+	@SuppressWarnings("unchecked")
+	public void notifyModelListener (final L listener, Object arg)
+	{
+	    listener.update (this, arg);
 	}
 }
 

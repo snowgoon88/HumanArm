@@ -12,5 +12,5 @@ package model;
  */
 public interface ModelListener <M>
 {
-  void modelChanged (M model);
+    void update (M model, Object o);
 }
