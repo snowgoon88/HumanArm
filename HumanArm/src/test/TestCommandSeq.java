@@ -11,7 +11,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 
+import viewer.CommandSequenceTableModel;
 import viewer.JCommandSequence;
 
 import model.Command;
@@ -187,7 +191,7 @@ public class TestCommandSeq {
 	
 	public void testGraphic() {
 		// Setup window
-		JFrame frame = new JFrame("Arm - Java2D API");
+		JFrame frame = new JFrame("Test JCommandSequence");
 		frame.setSize(600,600);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -222,6 +226,39 @@ public class TestCommandSeq {
 		seqViewer.add(com2);
 		com2.addObserver(seqViewer);
 
+	}
+	
+	public void testAsTable() {
+		// Setup window
+		JFrame frame = new JFrame("Test JTable");
+		frame.setSize(600,600);
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		frame.setLayout(new BorderLayout());
+		
+		CommandSequence com = new CommandSequence("com_0");		
+		com.add(new Command(1.0, 0.8));
+		com.add(new Command(0.0, 0.0));
+		com.add(new Command(0.3, 0.3));
+		com.add(new Command(2.0, 0.1));
+		
+		
+		CommandSequenceTableModel comTableModel = new CommandSequenceTableModel(com);
+		JTable comTable = new JTable( comTableModel );
+		comTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		comTable.setRowSelectionAllowed(false);
+		comTable.setColumnSelectionAllowed(false);
+		comTable.setCellSelectionEnabled(false);
+		
+		JScrollPane scrollPane = new JScrollPane(comTable);
+		comTable.setFillsViewportHeight(true);
+		
+		frame.add( scrollPane, BorderLayout.CENTER);
+		
+		frame.setVisible(true);
 	}
 	
 	public void testWrite() {
@@ -341,7 +378,8 @@ public class TestCommandSeq {
 		//app.testCreate();
 		//app.testAddFocus();
 		//app.testSpeed();
-		app.testGraphic();
+		//app.testGraphic();
+		app.testAsTable();
 		//app.testWrite();
 		//app.testRead();
 		//app.makeExemple();

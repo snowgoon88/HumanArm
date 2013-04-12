@@ -80,21 +80,26 @@ public class JExperience extends JPanel {
 		JSplitPane splitPane = new JSplitPane();
 		add(splitPane, BorderLayout.CENTER);
 		
-		// Left : JArm2D above with JArmLabel and JArmControl
-		JPanel leftPanel = new JPanel();
-		leftPanel.setLayout(new BorderLayout(0, 0));
+		// Left : Tabs = JArm and Table of CommandSequence
+		JTabbedPane leftTabPane = new JTabbedPane(JTabbedPane.TOP);
+		splitPane.setLeftComponent(leftTabPane);
+		
+		// LeftArm : JArm2D above with JArmLabel and JArmControl
+		JPanel armPanel = new JPanel();
+		armPanel.setLayout(new BorderLayout(0, 0));
 		_jArm = new JArm2D(_compArm.getArm());
 		_jArm.setMemorySize(20*40); // dt=25ms, 20 secondes
-		leftPanel.add(_jArm, BorderLayout.CENTER);
-		leftPanel.add(_jArm.getControlPanel(), BorderLayout.SOUTH);
+		armPanel.add(_jArm, BorderLayout.CENTER);
+		armPanel.add(_jArm.getControlPanel(), BorderLayout.SOUTH);
 		JArmLabel jArmInfo = new JArmLabel(_compArm.getArm());
-		leftPanel.add(jArmInfo, BorderLayout.NORTH);
+		armPanel.add(jArmInfo, BorderLayout.NORTH);
 		_compArm.getArm().addObserver(_jArm);
 		_compArm.getArm().addObserver(jArmInfo);
+		leftTabPane.addTab("Arm", armPanel);
+		
+		// LeftCommand : JTable of CommandSequence
 		
 		// Right : Tabs of Chart2D
-		splitPane.setLeftComponent(leftPanel);
-		
 		JTabbedPane rightTabPane = new JTabbedPane(JTabbedPane.TOP);
 		splitPane.setRightComponent(rightTabPane);
 		
