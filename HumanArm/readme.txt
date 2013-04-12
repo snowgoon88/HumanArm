@@ -35,9 +35,18 @@ avec le bras ('gui/ExpGUI'). Lire les commentaires dans 'gui/ExpGui'.
 
 Compiler et exécuter
 ====================
+Ce qui suit suppose que les librairies dont dépend 'HumanArm' (voir section
+suivante) sont dans le répertoire 'libs'. Si ce n'est pas le cas, il faut
+s'adapter en conséquence.
+
 Il suffit de se placer dans le répertoire HumanArm et de taper:
  - pour compiler : make class
  - pour lancer les exemples : make re ou make rc ou make rg ou make rgui
+ 
+Dépendances
+===========
+ - v1.0+ : jama, vecmath
+ - v1.5+ : jchart2s [http://jchart2d.sourceforge.net/]
 
 Nouveau dans la version 1.5
 ===========================
