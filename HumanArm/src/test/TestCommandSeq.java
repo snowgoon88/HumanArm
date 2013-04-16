@@ -6,7 +6,10 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -17,6 +20,7 @@ import javax.swing.ListSelectionModel;
 
 import viewer.CommandSequenceTableModel;
 import viewer.JCommandSequence;
+import viewer.JCommandSequenceTable;
 
 import model.Command;
 import model.CommandSequence;
@@ -261,6 +265,46 @@ public class TestCommandSeq {
 		frame.setVisible(true);
 	}
 	
+	public void testJTable() {
+		CommandSequence [] _consigne = new CommandSequence[6];
+		FileReader myFile;
+		try {
+			myFile = new FileReader( "data/consigne_example.data" );
+			BufferedReader myReader = new BufferedReader( myFile );
+	        
+	        // Need to read 6 CommandSequence
+	        for (int i = 0; i < _consigne.length; i++) {
+				_consigne[i] = new CommandSequence();
+				_consigne[i].read(myReader);
+			}
+	        
+	        myReader.close();
+	        myFile.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// Setup window
+		JFrame frame = new JFrame("Test JCommandSequence");
+		frame.setSize(600,600);
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		frame.setLayout(new BorderLayout());
+        
+		JCommandSequenceTable comTable = new JCommandSequenceTable(_consigne);
+		frame.add( comTable, BorderLayout.CENTER);
+		
+		frame.setVisible(true);
+		
+	}
+	
 	public void testWrite() {
 		CommandSequence com = new CommandSequence("Essai");		
 		com.add(new Command(1.1, 0.8));
@@ -379,7 +423,8 @@ public class TestCommandSeq {
 		//app.testAddFocus();
 		//app.testSpeed();
 		//app.testGraphic();
-		app.testAsTable();
+		//app.testAsTable();
+		app.testJTable();
 		//app.testWrite();
 		//app.testRead();
 		//app.makeExemple();
