@@ -24,6 +24,7 @@ import viewer.JCommandSequenceTable;
 
 import model.Command;
 import model.CommandSequence;
+import model.Consignes;
 
 /**
  * @author Alain.Dutech@loria.fr
@@ -266,26 +267,12 @@ public class TestCommandSeq {
 	}
 	
 	public void testJTable() {
-		CommandSequence [] _consigne = new CommandSequence[6];
-		FileReader myFile;
+		Consignes _consigne = new Consignes(6);
 		try {
-			myFile = new FileReader( "data/consigne_example.data" );
-			BufferedReader myReader = new BufferedReader( myFile );
-	        
-	        // Need to read 6 CommandSequence
-	        for (int i = 0; i < _consigne.length; i++) {
-				_consigne[i] = new CommandSequence();
-				_consigne[i].read(myReader);
-			}
-	        
-	        myReader.close();
-	        myFile.close();
-		} catch (FileNotFoundException e) {
+			_consigne.read("data/consigne_example.data");
+		} catch (IOException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
 		
 		// Setup window
@@ -302,7 +289,6 @@ public class TestCommandSeq {
 		frame.add( comTable, BorderLayout.CENTER);
 		
 		frame.setVisible(true);
-		
 	}
 	
 	public void testWrite() {

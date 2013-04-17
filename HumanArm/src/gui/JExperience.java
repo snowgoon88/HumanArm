@@ -19,11 +19,13 @@ import Jama.Matrix;
 
 import model.CommandSequence;
 import model.CompleteArm;
+import model.Consignes;
 import model.NeuroControl;
 
 import viewer.JArm2D;
 import viewer.JArmLabel;
 import viewer.JCommandSequence;
+import viewer.JCommandSequenceTable;
 
 /**
  * @author Alain.Dutech@loria.fr
@@ -35,6 +37,8 @@ public class JExperience extends JPanel {
 	
 	/** A CompleteArm */
 	CompleteArm _compArm;
+	/** Consignes */
+	Consignes _consigne;
 	
 	/** Default Color */
 	Color [] _defColors = {Color.blue, Color.red, Color.green,
@@ -59,6 +63,8 @@ public class JExperience extends JPanel {
 	JArm2D _jArm;
 	/** Panel for editing consignes */
 	JCommandSequence _comSeqViewer;
+	/** Panel for detailing/editing ComSeq */
+	JCommandSequenceTable _comSeqPanel;
 	
 	final int _nbMuscles = 6;
 	final int _nbJoint = 2;
@@ -66,10 +72,11 @@ public class JExperience extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public JExperience( CompleteArm arm ) {
+	public JExperience( CompleteArm arm, Consignes consigne) {
 		super();
 		
 		this._compArm = arm;
+		this._consigne = consigne;
 		
 		buildGUI();
 	}
@@ -98,6 +105,9 @@ public class JExperience extends JPanel {
 		leftTabPane.addTab("Arm", armPanel);
 		
 		// LeftCommand : JTable of CommandSequence
+		_comSeqPanel = new JCommandSequenceTable(_consigne);
+		_consigne.addObserver(_comSeqPanel);
+		leftTabPane.addTab("Consignes", _comSeqPanel);
 		
 		// Right : Tabs of Chart2D
 		JTabbedPane rightTabPane = new JTabbedPane(JTabbedPane.TOP);

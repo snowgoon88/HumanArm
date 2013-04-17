@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -32,6 +33,7 @@ import Jama.Matrix;
 
 import model.CommandSequence;
 import model.CompleteArm;
+import model.Consignes;
 
 
 /**
@@ -61,7 +63,7 @@ public class ExpGUI {
 	/** The complete arm simulated */
 	CompleteArm _arm;
 	/** Array of CommandSequence */
-	CommandSequence[] _consigne = new CommandSequence[6];
+	Consignes _consignes;
 	
 	/** Simulation time */
 	double _t = 0.0;
@@ -114,7 +116,10 @@ public class ExpGUI {
 	 * 
 	 */
 	public ExpGUI() {
+		// Modèle initiaux.
 		_arm = new CompleteArm();
+		int nbConsigne = _arm.getArrayNeuroControlers().length;
+		_consignes = new Consignes(nbConsigne);
 		
 		buildActions();
 		buildGUI();
@@ -159,7 +164,7 @@ public class ExpGUI {
 		});
 		frame.setLayout(new BorderLayout());
 
-		_xpPanel = new JExperience(_arm );
+		_xpPanel = new JExperience(_arm , _consignes);
 		frame.add(_xpPanel, BorderLayout.CENTER);
 		
 		_toolBar = new JPanel();
@@ -234,8 +239,8 @@ public class ExpGUI {
 		_xpPanel.reset();
 	}
 	private void step( double dt ) {
-		for (int i = 0; i < _consigne.length; i++) {
-			CommandSequence cs = _consigne[i];
+		for (int i = 0; i < _consignes.size(); i++) {
+			CommandSequence cs = _consignes.get(i);
 			// la valeur de la consigne est copiée dans le vecteur u
 			_u.set(0,i, cs.getValAtTimeFocussed(_t));
 		}
@@ -274,7 +279,7 @@ public class ExpGUI {
 			// Pour chaque muscle
 			Matrix act = _arm.getMuscleActivation();
 			Matrix tau = _arm.getMuscles().getTension();
-			for (int i = 0; i < _consigne.length; i++) {
+			for (int i = 0; i < _consignes.size(); i++) {
 				bw.write("\t"+Double.toString(_u.get(0, i))
 						+"\t"+Double.toString(act.get(0, i))
 						+"\t"+Double.toString(tau.get(0, i)));
@@ -304,18 +309,12 @@ public class ExpGUI {
 	 * @throws IOException
 	 */
 	public void readCommandSequences(String fileName) throws IOException {
-		FileReader myFile = new FileReader( fileName );
-        BufferedReader myReader = new BufferedReader( myFile );
-        
-        // Need to read 6 CommandSequence
-        for (int i = 0; i < _consigne.length; i++) {
-			_consigne[i] = new CommandSequence();
-			_consigne[i].read(myReader);
-			_xpPanel.addConsigne(_consigne[i]);
+		_consignes.read(fileName);
+		
+        // Need to update _xpPanel
+        for (int i = 0; i < _consignes.size(); i++) {
+			_xpPanel.addConsigne(_consignes.get(i));
 		}
-        
-        myReader.close();
-        myFile.close();
 	}
 	/**
 	 * Write the 6 CommandSequence to a file.
@@ -323,16 +322,7 @@ public class ExpGUI {
 	 * @throws IOException
 	 */
 	public void writeCommandSequences(String fileName) throws IOException {
-		FileWriter myFile = new FileWriter( fileName );
-        BufferedWriter myWriter = new BufferedWriter( myFile );
-        
-        // Need to write 6 CommandSequence
-        for (int i = 0; i < _consigne.length; i++) {
-			_consigne[i].write(myWriter);
-		}
-        
-        myWriter.close();
-        myFile.close();
+		_consignes.write(fileName);
 	}
 
 	/**
@@ -427,9 +417,6 @@ public class ExpGUI {
 		public void actionPerformed(ActionEvent e) {
 			// First, remove old Consignes
 			_xpPanel.removeAllConsigne();
-			for (int i = 0; i < _consigne.length; i++) {
-				_consigne[i] = null;
-			}
 			
 			// Then ask about file to open
 			int returnVal = _fileChooser.showOpenDialog(_xpPanel);
