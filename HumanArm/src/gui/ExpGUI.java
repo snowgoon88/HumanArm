@@ -8,12 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -311,10 +308,10 @@ public class ExpGUI {
 	public void readCommandSequences(String fileName) throws IOException {
 		_consignes.read(fileName);
 		
-        // Need to update _xpPanel
-        for (int i = 0; i < _consignes.size(); i++) {
-			_xpPanel.addConsigne(_consignes.get(i));
-		}
+//        // Need to update _xpPanel
+//        for (int i = 0; i < _consignes.size(); i++) {
+//			_xpPanel.addConsigne(_consignes.get(i));
+//		}
 	}
 	/**
 	 * Write the 6 CommandSequence to a file.

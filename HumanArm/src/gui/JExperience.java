@@ -115,6 +115,7 @@ public class JExperience extends JPanel {
 		
 		// CommandSequence Editor
 		_comSeqViewer = new JCommandSequence();
+		_consigne.addObserver(_comSeqViewer);
 		rightTabPane.addTab("Consignes", null, _comSeqViewer, null);
 		
 		// 

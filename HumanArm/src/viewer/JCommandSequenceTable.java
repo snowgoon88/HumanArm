@@ -10,12 +10,10 @@ import java.util.Observer;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
@@ -33,8 +31,6 @@ implements ActionListener, Observer {
 	/** Ensemble de CommandSequence */
 	Consignes _consignes;
 	
-	/** CheckBoxes pour les différentes CommandSequence */
-	JCheckBox[] _comBox;
 	/** ComboBox pour les choix de ComSeq à détailler */
 	JComboBox<String> _comChoice;
 	/** Table pour les détails */
@@ -54,19 +50,6 @@ implements ActionListener, Observer {
 	private void buildGUI() {
 		// Set Layout -> Vertical
 		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-		
-		JLabel visLabel = new JLabel("Consignes visibles");
-		add(visLabel);
-		
-		// Check Boxes
-		_comBox = new JCheckBox[_consignes.size()];
-		for (int i = 0; i < _consignes.size(); i++) {
-			_comBox[i] = new JCheckBox(_consignes.get(i).getName(),true);
-			add(_comBox[i]);
-		}
-		
-		JSeparator sep = new JSeparator();
-		add(sep);
 		
 		// Une JCombBox pour choisir celui qui est dans la table
 		JLabel choiceLabel = new JLabel("Consigne détaillée");
@@ -107,7 +90,7 @@ implements ActionListener, Observer {
 	 *  - "choice" : change la ComSeq qui est détaillée
 	 */
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("ACTION: "+e.getActionCommand());
+		//System.out.println("ACTION: "+e.getActionCommand());
 		
 		switch (e.getActionCommand()) {
 		case "choice": // Change le ComSeq détaillé
@@ -137,17 +120,15 @@ implements ActionListener, Observer {
 		
 		if (arg == null) {
 			// Tout a changé
-			updateComBox();
+			updateComChoice();
 		}
 		
 	}
 
-	void updateComBox() {
-		// Maj ComboBox
-		for (int i = 0; i < _comBox.length; i++) {
-			_comBox[i].setText(_consignes.get(i).getName());
-		}
-		
+	/**
+	 * Quand Consigne a changé, met à jour la liste de choix de ComSeq à détailler.
+	 */
+	void updateComChoice() {
 		_comChoice.removeAllItems();
 		// Maj des choix de consignes
 		for (int i = 0; i < _consignes.size(); i++) {

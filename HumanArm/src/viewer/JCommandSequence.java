@@ -24,9 +24,10 @@ import java.util.Observer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -36,6 +37,7 @@ import javax.swing.JSeparator;
 
 import model.Command;
 import model.CommandSequence;
+import model.Consignes;
 import utils.GraphicHelper;
 
 /**
@@ -68,6 +70,8 @@ public class JCommandSequence extends JPanel implements Observer {
 	
 	/** PopupMenu */
 	PopUpChart _popupMenu;
+	/** Ensemble de CheckBox pour les traces */
+	JPanel _traceCheckPanel;
 	/** Action to add a new Command */
 	Action _addCommandAct;
 	/** Action to remove the selected Command */
@@ -86,10 +90,14 @@ public class JCommandSequence extends JPanel implements Observer {
 		_selectCom = null;
 		_selectTrace = null;
 		
+		_traceCheckPanel = new JPanel();
+		_traceCheckPanel.setLayout(new BoxLayout(_traceCheckPanel,BoxLayout.Y_AXIS));
 		
 		buildActions();
 		buildGUI();
 		_popupMenu = new PopUpChart();
+		_popupMenu.add( _traceCheckPanel );
+		_popupMenu.add( new JSeparator());
 		_chart.setComponentPopupMenu( _popupMenu );	
 	}
 	
@@ -103,14 +111,25 @@ public class JCommandSequence extends JPanel implements Observer {
 		boolean res = _comList.add(obj);
 		
 		// new trace
-		ITrace2D trace = new Trace2DSimple();
+		final ITrace2D trace = new Trace2DSimple();
 		_chart.addTrace(trace);
 		_traces.add( trace );
 		trace.setColor(_gh._defColors[_comList.size() % _gh._defColors.length]);
 		trace.setVisible(true);
 		
 		updateTrace(trace, obj);
-		_popupMenu.addTrace(trace, true);
+		//_popupMenu.addTrace(trace, true);
+		
+		// Maj de _traceCheckPanel
+		JCheckBox comBox = new JCheckBox(obj.getName(),true);
+		comBox.setSelected(true);
+		comBox.addItemListener(new ItemListener() {			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				trace.setVisible(!trace.isVisible());
+			}
+		});
+		_traceCheckPanel.add(comBox);
 		return res;
 	}
 	/**
@@ -121,7 +140,7 @@ public class JCommandSequence extends JPanel implements Observer {
 		_chart.removeAllTraces();
 		_traces.clear();
 		_comList.clear();
-		_popupMenu.removeAllTrace();
+		//_popupMenu.removeAllTrace();
 	}
 
 	/**
@@ -398,6 +417,9 @@ public class JCommandSequence extends JPanel implements Observer {
 
 	@Override
 	public void update(Observable model, Object o) {
+		System.out.println("JComSeq.update model = "+model.getClass().getName());
+		System.out.println("                   arg= "+o);
+		// On modifie la command Sequence (ds Table ou mouse)
 		if (model instanceof CommandSequence) {
 			CommandSequence com = (CommandSequence) model;
 			// find the trace
@@ -408,8 +430,18 @@ public class JCommandSequence extends JPanel implements Observer {
 			} else {
 				System.err.println("[CommandSequence.update] model not found.");
 			}
-		} else {
-			System.err.println("[CommandSequence.update] model not of type CommandSequence.");
+		}
+		// Toutes les ComSeq sont modifiées
+		else if (model instanceof Consignes) {
+			Consignes consigne = (Consignes) model;
+			clear();
+			for (int i = 0; i < consigne.size(); i++) {
+				add(consigne.get(i));
+				consigne.get(i).addObserver(this);
+			}
+		}
+		else {
+			System.err.println("[CommandSequence.update] model of unknown type.");
 		}
 	}
 	
@@ -489,31 +521,7 @@ public class JCommandSequence extends JPanel implements Observer {
 			anItem = new JMenuItem(_removeCommandAct);
 			add(anItem);
 			addSeparator();
-		}
-		/**
-		 * Add a CheckBox for a ITrace.
-		 */
-		public void addTrace( final ITrace2D trace, boolean visible ) {
-			JCheckBoxMenuItem check = new JCheckBoxMenuItem(trace.getName());
-			check.setSelected(visible);
-			trace.setVisible(visible);
-			check.addItemListener(new ItemListener() {			
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					trace.setVisible(!trace.isVisible());
-				}
-			});
-			add(check);
-		}
-		public void removeAllTrace() {
-			removeAll();
-			// Actions
-			JMenuItem anItem;
-			anItem = new JMenuItem(_addCommandAct);
-			add(anItem);
-			anItem = new JMenuItem(_removeCommandAct);
-			add(anItem);
-			addSeparator();
+			add(_traceCheckPanel);
 		}
 	}
 }
