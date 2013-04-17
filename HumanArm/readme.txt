@@ -3,6 +3,7 @@ HumanArm
 
 Quelques classes java pour simuler un bras humain très simple.
 
+16/04/2013 - v2.2 - Interface graphique plus évoluée.
 07/12/2012 - v2.0 - Application GUI évoluée pour l'exemple
 05/12/2012 - v1.5 - ArmGraphic amélioré et Experience avec sauvegarde
 04/12/2012 - v1.0 - Fonctionnel avec exemples console et graphic
@@ -75,9 +76,18 @@ Nouveau dans la version 2.0
 permet de jouer avec le bras : définir des consignes (load/save), lancer des simulations
 et enregistrer toutes les variables importantes dans un fichier.
 
+Nouveau dans la version 2.2
+===========================
+1) Correction d'un bug qui permettait à l'activation de sortir de [0,1]
+2) Peut afficher l'espace atteignable et un but du bras
+3) Les contraintes du bras sont plus facilement utilisables
+4) Un fichier 'ant'
+La plupart des corrections/améliorations de cette version sont dues à
+Thomas MOINEL.
+
 A faire
 =======
-1) Générer une documentaion.
+1) Générer une documentation.
 2) Eventuellement, utiliser 'ant'.
  
 Pour en savoir plus
