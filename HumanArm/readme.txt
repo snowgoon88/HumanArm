@@ -48,6 +48,7 @@ Dépendances
 ===========
  - v1.0+ : jama, vecmath
  - v1.5+ : jchart2s [http://jchart2d.sourceforge.net/]
+ - v2.2+ : projet JavaUtils [git://github.com/snowgoon88/JavaUtils.git]
 
 Nouveau dans la version 1.5
 ===========================
@@ -82,13 +83,17 @@ Nouveau dans la version 2.2
 2) Peut afficher l'espace atteignable et un but du bras
 3) Les contraintes du bras sont plus facilement utilisables
 4) Un fichier 'ant'
+5) On peut modifier les CommandSequence dans une Table sur le panneau de gauche
+6) Le répertoire 'src.utils' n'est plus, et HumanArm fait maintenant appel
+au Projet 'JavaUtils'. Cela n'est apparent que quand on 'fork' le projet. Les fichiers
+'tgz' continuent d'inclure 'src.utils'.
+ 
 La plupart des corrections/améliorations de cette version sont dues à
 Thomas MOINEL.
 
 A faire
 =======
 1) Générer une documentation.
-2) Eventuellement, utiliser 'ant'.
  
 Pour en savoir plus
 ===================
