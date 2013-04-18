@@ -12,7 +12,7 @@
 # >make tgz
 
 PROJET = HumanArm
-VERSION = 2.0
+VERSION = 2.2
 
 HOMEDIR = HumanArm
 
@@ -23,7 +23,9 @@ TAR_SRC = $(HOMEDIR)/src/example \
           $(HOMEDIR)/src/viewer/JArm2D.java \
           $(HOMEDIR)/src/viewer/JArmLabel.java \
           $(HOMEDIR)/src/viewer/JCommand.java \
-          $(HOMEDIR)/src/viewer/JCommandSequence.java
+          $(HOMEDIR)/src/viewer/JCommandSequence.java \
+          $(HOMEDIR)/src/viewer/CommandSequenceTableModel.java \
+          $(HOMEDIR)/src/viewer/JCommandSequenceTable.java
 
 TAR_LIBS = $(HOMEDIR)/libs
 
