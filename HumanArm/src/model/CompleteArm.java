@@ -5,7 +5,11 @@ package model;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Observable;
+
 import javax.vecmath.Point3d;
+
+import utils.JamaU;
 import Jama.Matrix;
 
 /**
@@ -35,7 +39,7 @@ import Jama.Matrix;
  * 
  * @author Alain.Dutech@loria.fr
  */
-public class CompleteArm {
+public class CompleteArm extends Observable {
 	/** Commande neuronale => activation du muscle */
 	NeuroControl [] _nc = new NeuroControl[6];
 	/** 1 x nb_muscles : Matrix of muscles activation */
@@ -81,6 +85,9 @@ public class CompleteArm {
 			_nc[i].setAct(0.0);
 			_nc[i].setU(0.0);
 		}
+		// Observable
+		setChanged();
+		notifyObservers();
 	}
 	
 	/**
@@ -93,7 +100,9 @@ public class CompleteArm {
 	 */
 	public ArrayList<Point3d> applyTorque( Matrix torque, double dt ) {
 		_arm.applyTension( torque, dt );
-		
+		// Observable
+		setChanged();
+		notifyObservers();
 		return _arm.getArmPoints();
 	}
 	/**
@@ -108,6 +117,9 @@ public class CompleteArm {
 		assert checkBounds(act) : "activation out of bounds [0:1]";
 		_muscles.computeTorque(act, _arm.getArmPos(), _arm.getArmSpeed());
 		
+		// Observable
+		setChanged();
+		notifyObservers();
 		return applyTorque(_muscles.getTorque(), dt);
 	}
 
@@ -143,6 +155,9 @@ public class CompleteArm {
 			_act.set(0, i, _nc[i].getAct());
 		}
 		
+		// Observable
+		setChanged();
+		notifyObservers();
 		return applyActivation(_act, dt);
 	}
 	
@@ -160,25 +175,14 @@ public class CompleteArm {
 			str += df5_3.format(_nc[i].getAct())+", ";
 		}
 		// tension des muscles
-		str += "\n  tau= "+vecToString(_muscles.getTension());
+		str += "\n  tau= "+JamaU.vecToString(_muscles.getTension());
 		// Couples sur articulations
-		str += "\n  cpl= "+vecToString(_muscles.getTorque());
+		str += "\n  cpl= "+JamaU.vecToString(_muscles.getTorque());
 		// Bras
-		str += "\n  ang= "+vecToString(_arm.getArmPos());
-		str += "\n  spd= "+vecToString(_arm.getArmSpeed());
+		str += "\n  ang= "+JamaU.vecToString(_arm.getArmPos());
+		str += "\n  spd= "+JamaU.vecToString(_arm.getArmSpeed());
 		str += "\n";
 		
-		return str;
-	}
-	private String vecToString( Matrix vec ) {
-		String str = "";
-		if (vec.getRowDimension() > 0 ) {
-			str += "[";
-			for (int i = 0; i < vec.getColumnDimension(); i++) {
-				str += df5_3.format(vec.get(0, i))+"; ";
-			}
-			str += "]";
-		}
 		return str;
 	}
 
