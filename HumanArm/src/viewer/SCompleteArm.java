@@ -48,8 +48,8 @@ public class SCompleteArm implements Observer {
 			
 			Arm arm = cArm.getArm();
 			
-			viewStr += arm.getArmEndPointX()+"\t";
-			viewStr += arm.getArmEndPointY();
+			viewStr += df3_5.format(arm.getArmEndPointX())+"\t";
+			viewStr += df3_5.format(arm.getArmEndPointY());
 		}
 	}
 
