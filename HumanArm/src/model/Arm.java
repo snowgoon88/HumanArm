@@ -343,6 +343,13 @@ public class Arm extends Observable {
 		return _posY[_posY.length-1];
 	}
 	/**
+	 * Get the Tension/Torque at every joint
+	 * @return 1xnbJoint Matrix
+	 */
+	public Matrix getTension() {
+		return _tau;
+	}
+	/**
 	 * Get the constraints apply on the arm (boundaries).
 	 * @return _contraints
 	 */
