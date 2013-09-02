@@ -157,6 +157,12 @@ public class SimpleMuscle {
 	}
 
 	/**
+	 * Get number of Muscles.
+	 */
+	public int getNbMuscles() {
+		return _ln.getColumnDimension();
+	}
+	/**
 	 * Normalized length of the Muscles
 	 * @return _ln
 	 */

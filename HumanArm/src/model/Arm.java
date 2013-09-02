@@ -226,15 +226,22 @@ public class Arm extends Observable {
 	}
 
 	/**
+	 * Get the dimension of the Arm (i.e: nb of joints)
+	 */
+	public int getDimension() {
+		return _dimQ;
+	}
+	
+	/**
 	 * Get the vector of the arm angles.
-	 * @return _q as a Jama.Matrix 
+	 * @return _q as a Jama.Matrix (jama.Matrix de 1 row et _dimQ colonnes)
 	 */
 	public Matrix getArmPos() {
 		return _q;
 	}
 	/**
 	 * Set the vector of arm angles, using a Jama.Matrix.
-	 * @param q, Jama.Matrix, of the right dimensions
+	 * @param q, Jama.Matrix, of the right dimensions (jama.Matrix de 1 row et _dimQ colonnes)
 	 */
 	public void setArmPos(Matrix q) {
 		if( q.getColumnDimension() == _q.getColumnDimension() && 
@@ -262,14 +269,14 @@ public class Arm extends Observable {
 
 	/**
 	 * Get the vector of the arm angular speed.
-	 * @return _dq as a jama.Matrix
+	 * @return _dq as a jama.Matrix (jama.Matrix de 1 row et _dimQ colonnes)
 	 */
 	public Matrix getArmSpeed() {
 		return _dq;
 	}
 	/**
 	 * Set the vector of arm angular speed, using a Jama.Matrix.
-	 * @param dq, jama.Matrix of the right dimensions
+	 * @param dq, jama.Matrix of the right dimensions (jama.Matrix de 1 row et _dimQ colonnes)
 	 */
 	public void setArmSpeed(Matrix dq) {
 		if( dq.getColumnDimension() == _dq.getColumnDimension() && 

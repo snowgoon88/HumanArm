@@ -170,6 +170,15 @@ public class CommandSequence extends Observable implements Iterable<Command> {
 		}
 		return null;
 	}
+	/**
+	 * Renvoie la Commande à l'index donné.
+	 * 
+	 * @param index
+	 * @return Command trouvé ou lance Exception :o)
+	 */
+	public Command get(int index) {
+		return _commands.get(index);
+	}
 	
 	@Override
 	public Iterator<Command> iterator() {
