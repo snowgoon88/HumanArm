@@ -204,7 +204,7 @@ public class CommandSequence extends Observable implements Iterable<Command> {
 		return res;
 	}
 	public void changeCommand(Command obj, double time, double val ) {
-		System.out.println("Changing "+obj.toString());
+//		System.out.println("Changing "+obj.toString());
 		obj.time = time;
 		obj.val = val;
 		Collections.sort(_commands);
@@ -213,7 +213,7 @@ public class CommandSequence extends Observable implements Iterable<Command> {
 		
 		setChanged();
 		notifyObservers();
-		System.out.println(this.toString());
+//		System.out.println(this.toString());
 	}
 	
 	public void clear() {
