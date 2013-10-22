@@ -1,8 +1,10 @@
 HumanArm
 --------
 
-Quelques classes java pour simuler un bras humain très simple.
+Quelques classes java pour simuler un bras humain très simple, avec 2
+modèles différents.
 
+22/10/2013 - v3.0 - ArmKaladjian : modèle utilisé par kaladjian.
 16/04/2013 - v2.2 - Interface graphique plus évoluée.
 07/12/2012 - v2.0 - Application GUI évoluée pour l'exemple
 05/12/2012 - v1.5 - ArmGraphic amélioré et Experience avec sauvegarde
@@ -90,6 +92,11 @@ au Projet 'JavaUtils'. Cela n'est apparent que quand on 'fork' le projet. Les fi
  
 La plupart des corrections/améliorations de cette version sont dues à
 Thomas MOINEL.
+
+Nouveau dans la version 3.0
+===========================
+La principale nouveauté est l'ajout d'un second modèle, utilisé par Kaladjian
+dans sa thèse.
 
 A faire
 =======
