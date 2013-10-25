@@ -27,7 +27,7 @@ import javax.swing.event.ChangeListener;
 
 import Jama.Matrix;
 
-import model.Arm;
+import model.ArmModel;
 import model.ArmConstraints;
 
 /**
@@ -50,7 +50,7 @@ public class JArm2D extends JPanel implements Observer {
 	Dimension _size;
 	
 	/** Model : HumanArm */
-	Arm _arm;
+	ArmModel _arm;
 	/** Memory of end points */
 	RingBufferArrayFast<Double> _endX, _endY;
 	/** Display Memory */
@@ -66,13 +66,13 @@ public class JArm2D extends JPanel implements Observer {
 	/** Display the reaching area */
 	boolean _fg_reaching = false;
 
-	public JArm2D( Arm model ) {
+	public JArm2D( ArmModel model ) {
 		super();
 		_arm = model;
 		_endX = new RingBufferArrayFast<Double>(100);
 		_endY = new RingBufferArrayFast<Double>(100);
 	}
-	public JArm2D( Arm model, double minX, double maxX, double minY, double maxY ) {
+	public JArm2D( ArmModel model, double minX, double maxX, double minY, double maxY ) {
 		super();
 		_arm = model;
 		_endX = new RingBufferArrayFast<Double>(100);

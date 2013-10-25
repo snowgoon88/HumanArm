@@ -123,9 +123,10 @@ public class TestArmKaladjian {
 		
 		// Elements graphiques
 		// Chart2D for articulations : 2 x 1 Traces (Couple)
-		JPanel forcePanel = new JPanel(new BorderLayout());
+		JPanel forcePanel = new JPanel();
 		Chart2D forceChart = new Chart2D();
-		forcePanel.add(forceChart, BorderLayout.CENTER);
+		forceChart.setPreferredSize(new Dimension(500,500));
+		forcePanel.add(forceChart);
 		Trace2DSimple[] forceTraces = new Trace2DSimple[6];
 		for (int i = 0; i < forceTraces.length; i++) {
 			forceTraces[i] = new Trace2DSimple("vFA_"+i);
@@ -133,12 +134,23 @@ public class TestArmKaladjian {
 			forceTraces[i].setColor(_defColors[i % _defColors.length]);
 			forceTraces[i].setVisible(true);
 		}
-		forcePanel.setPreferredSize(new Dimension(600, 300));
+		//forcePanel.setPreferredSize(new Dimension(600, 300));
 		forcePanel.setVisible(true);
+		Chart2D comChart = new Chart2D();
+		comChart.setPreferredSize(new Dimension(500,500));
+		forcePanel.add(comChart);
+		Trace2DSimple[] comTraces = new Trace2DSimple[6];
+		for (int i = 0; i < comTraces.length; i++) {
+			comTraces[i] = new Trace2DSimple("com_"+i);
+			comChart.addTrace(comTraces[i]);
+			comTraces[i].setColor(_defColors[i % _defColors.length]);
+			comTraces[i].setVisible(true);
+		}
 		
 		// Angles
 		Matrix theta = new Matrix(1, 2, 0.0);
 		Matrix F;
+		Matrix L;
 		theta.set(0, 0, Math.toRadians(25));
 //		theta.set(0, 1, Math.toRadians(170.0));
 //		arm.findContractionLevel(theta);
@@ -146,9 +158,11 @@ public class TestArmKaladjian {
 			//theta.set(0, 0, Math.toRadians(ang2)/2);
 			theta.set(0, 1, Math.toRadians(ang2));
 			System.out.println("Looking for (25,"+ang2+") "+JamaU.vecToString(theta));
-			F = arm.findContractionLevel(theta);
+			F = arm.findContractionForce(theta);
+			L = arm.getLambdaFromForce(F, 1, theta);
 			for (int i = 0; i < forceTraces.length; i++) {
 				forceTraces[i].addPoint(ang2, F.get(1, i));
+				comTraces[i].addPoint(ang2, L.get(0, i));
 			}
 		}
 		
@@ -156,6 +170,11 @@ public class TestArmKaladjian {
 
 		return res;
 	}
+	
+	/**
+	 * Test : donner une commande, y mettre le bras en l'initiant je sais
+	 * pas comment (surtout pour lSE, N et autre, et voir l'évolution.
+	 */
 	
 	
 	/**

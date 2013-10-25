@@ -17,31 +17,34 @@ import Jama.Matrix;
  * @author alain.dutech@loria.fr
  *
  */
-public class ArmKaladjian {
+public class ArmKaladjian extends ArmModel {
 	// Pour toutes les matrices, ligne : 1:épaule, 2:coude, 3:bi
 	//                             col : 1:flex, 2:ext
 	
 	/** Moment des muscles Mono et Bi, en tenant compte des signes (évite les (-1)^j)*/
 	Matrix _hm = new Matrix( new double[][] {{-0.03, 0.04}, {-0.04, 0.02}});
 	Matrix _hb = new Matrix( new double[][] {{-0.05, -0.04}, {0.05, 0.02}});
+	/** A partir de _hm et _hb, pour simplifier les calculs */
+	Matrix _H = new Matrix( 2, 6, 0.0);
 	/** Coefficient liant section muscle à sa force */
-	Matrix _ro = new Matrix( new double[][] {{6.8, 11}, {3.6, 6}, {2.1, 6.7}});
+	Matrix _ro = new Matrix( new double[][] {{6.8, 11, 3.6, 6, 2.1, 6.7}});
 	
-	/** entrée des neurones moteurs */
-	Matrix _E = new Matrix(3, 2, 0.0);
-	/** activité des neurones moteurs */
-	Matrix _G = new Matrix(3, 2, 0.0);
+	
+	/** entrée des neurones moteurs, 1x6 : 11, 12, 21, 22, 31, 32 */
+	Matrix _E = new Matrix(1, 6, 0.0);
+	/** activité des neurones moteurs 1x6 : 11, 12, 21, 22, 31, 32 */
+	Matrix _G = new Matrix(1, 6, 0.0);
 	/** activité des éléments contractant, dérivée, dérivée seconde */
-	Matrix _N = new Matrix(3, 2, 0.0);
-	Matrix _NDot = new Matrix(3, 2, 0.0);
-	Matrix _NDot2 = new Matrix(3, 2, 0.0);
+	Matrix _N = new Matrix(1, 6, 0.0);
+	Matrix _NDot = new Matrix(1, 6, 0.0);
+	Matrix _NDot2 = new Matrix(1, 6, 0.0);
 	/** Longueur des éléments séquentiels */
-	Matrix _lSE = new Matrix(3, 2, 0.0);
-	Matrix _lSEDot = new Matrix(3, 2, 0.0);
+	Matrix _lSE = new Matrix(1, 6, 0.0);
+	Matrix _lSEDot = new Matrix(1, 6, 0.0);
 	/** Forces contractile */
-	Matrix _FSE = new Matrix(3, 2, 0.0);
+	Matrix _FSE = new Matrix(1, 6, 0.0);
 	/** Force passive */
-	Matrix _FP = new Matrix(3, 2, 0.0);
+	Matrix _FP = new Matrix(1, 6, 0.0);
 	
 	/** Inertia Matrix */
 	Matrix _I = new Matrix(2, 2, 0.0);
@@ -73,12 +76,11 @@ public class ArmKaladjian {
 	double _f2 = 1.0 / (Math.PI/2.0 + Math.atan(_f3));
 	double _f1 = Math.PI/2.0 * _f2;
 	/** Angles de repos */
-	double[] _thetaR = {Math.PI/4.0, Math.PI/2.0};
+	Matrix _thetaR = new Matrix( new double[][] {{Math.PI/4.0, Math.PI/2.0}});
 	/** Parametres anthropométriques */
 	double _z1 = 0.062 + 0.082 + 1.65 * 0.34*0.34;
 	double _z2 = 1.65 * 0.34 * 0.19;
 	double _z3 = 0.082;
-
 	
 	/** Delta_t de la simulation */
 	double _dt = 0.005;
@@ -91,11 +93,19 @@ public class ArmKaladjian {
 	DecimalFormat df3 = new DecimalFormat( "000" );
 	
 	/**
-	 * 
+	 * Pas de contraintes par défaut.
 	 */
 	public ArmKaladjian() {
+		_l = new double[] {0.34, 0.46};
+		
 		_thetaMemory = new Vector<Matrix>();
 		_thetaDotMemory = new Vector<Matrix>();
+		
+		// Update _H
+		_H.set(0, 0, - _hm.get(0, 0)); _H.set(0, 1, _hm.get(0, 1));
+		_H.set(1, 2, - _hm.get(1, 0)); _H.set(1, 3, _hm.get(1, 1));
+		_H.set(0, 4, - _hb.get(0, 0)); _H.set(0, 5, _hb.get(0, 1));
+		_H.set(1, 4, - _hb.get(1, 0)); _H.set(1, 5, _hb.get(1, 1));
 	}
 	
 	/**
@@ -108,41 +118,34 @@ public class ArmKaladjian {
 		_thetaDotMemory.add(angDot);
 	}
 	/**
-	 * Calcule Eij, puis Gij.
+	 * Calcule Eij, puis Gij à partir de theta et thetaDot à (t-_tauDel).
 	 * 
-	 * @param lambda
-	 * @param t
+	 * @param theta angles in 1x2 Matrix
+	 * @param thetaDot speed in 1x2 Matrix
+	 * @param lambda 1x6 Matrix
 	 */
-	void actNij( Matrix lambda, double t) {
+	void actNij( Matrix theta, Matrix thetaDot, Matrix lambda) {
 		// Matrice des angles
-		Matrix ang = getTheta(t-_tauDel).plus(getThetaDot(t-_tauDel).times(_mu));
+		Matrix ang = theta.plus(thetaDot.times(_mu));
 		System.out.println("ang="+JamaU.vecToString(ang));
 		
-		// Mono
-		for( int i=1; i<3; i++) {
-			for( int j=1; j<3; j++) {
-				_E.set(i-1, j-1, _hm.get(i-1,j-1) * ang.get(0,i-1));
-			}
-		}
-		// Bi
-		_E.set(2, 0, _hb.get(0,0)*ang.get(0,0) + _hb.get(0,1)*ang.get(0,1));
-		_E.set(2, 1, _hb.get(1,0)*ang.get(0,0) + _hb.get(1,1)*ang.get(0,1));
-		System.out.println("_E="+JamaU.matToString(_E));
+		// _E
+		_E = ang.times(_H);
+		System.out.println("_E="+JamaU.vecToString(_E));
 		
 		Matrix comE = _E.minus(lambda);
-		System.out.println("comE="+JamaU.matToString(comE));
+		System.out.println("comE="+JamaU.vecToString(comE));
 		
-		for( int i=1; i<4; i++) {
-			for( int j=1; j<3; j++) {
-				if (comE.get(i-1, j-1) >= 0.0) {
-					_G.set(i-1, j-1, _ro.get(i-1,j-1) * Math.exp(_alpha*(_E.get(i-1, j-1)) - 1.0 ));
-				}
-				else {
-					_G.set(i-1, j-1, 0.0);
-				}
+		// _G
+		for( int col=0; col<_E.getColumnDimension(); col++) {
+			if (comE.get(0, col) >= 0.0) {
+				_G.set(0, col, _ro.get(0, col) * Math.exp(_alpha*(comE.get(0, col)) - 1.0 ));
+			}
+			else {
+				_G.set(0, col, 0.0);
 			}
 		}
-		System.out.println("_G="+JamaU.matToString(_G));
+		System.out.println("_G="+JamaU.vecToString(_G));
 		
 		// Dérivée seconde de Nij
 		_NDot2 = _G.minus(_N).minus(_NDot.times(2.0 * _tauN));
@@ -151,72 +154,60 @@ public class ArmKaladjian {
 		_NDot.plusEquals(_NDot2.times(_dt));
 		// Activité
 		_N.plusEquals(_NDot.times(_dt));
-		System.out.println("_NDot2="+JamaU.matToString(_NDot2));
-		System.out.println("_NDot="+JamaU.matToString(_NDot));
-		System.out.println("_N="+JamaU.matToString(_N));
+		System.out.println("_NDot2="+JamaU.vecToString(_NDot2));
+		System.out.println("_NDot="+JamaU.vecToString(_NDot));
+		System.out.println("_N="+JamaU.vecToString(_N));
 	}
 	/**
 	 * Utilise le fait que FCE=FSE pour calculer, avec un schéma de Lagrange
 	 * les valeurs des longueurs.
 	 */
-	void muscleLength(double t) {
+	void muscleLength(Matrix thetaDot) {
 		Matrix passF = _lSE.copy();
 		// [exp(beta*lSE)-1]+
-		for( int i=0; i < passF.getRowDimension(); i++) {
-			for (int j=0; j < passF.getColumnDimension(); j++ ) {
-				double val = Math.exp(_beta * passF.get(i, j)) - 1.0;
-				if (val >= 0.0) {
-					passF.set(i, j, val);
-				}
-				else {
-					passF.set(i, j, 0.0);
-				}
+		for (int col=0; col < passF.getColumnDimension(); col++ ) {
+			double val = Math.exp(_beta * passF.get(0, col)) - 1.0;
+			if (val >= 0.0) {
+				passF.set(0, col, val);
+			}
+			else {
+				passF.set(0, col, 0.0);
 			}
 		}
-		System.out.println("passF="+JamaU.matToString(passF));
+		System.out.println("passF="+JamaU.vecToString(passF));
 		// 
 		passF.arrayRightDivideEquals(_N);
-		System.out.println("passF="+JamaU.matToString(passF));
+		System.out.println("passF="+JamaU.vecToString(passF));
 		passF.arrayTimesEquals(_ro);
-		passF.minus( new Matrix(3, 2, _f1));
+		passF.minus( new Matrix(1, 6, _f1));
 		passF.timesEquals(1.0/_f2);
-		for( int i=0; i < passF.getRowDimension(); i++) {
-			for (int j=0; j < passF.getColumnDimension(); j++ ) {
-				passF.set(i,  j, (Math.tan( passF.get(i, j)) / _f4) );
-				// 
-			}
+		for (int col=0; col < passF.getColumnDimension(); col++ ) {
+			passF.set(0,  col, ( (Math.tan( passF.get(0, col))- _f3) / _f4) );
+			// 
 		}
-		System.out.println("lCEDot="+JamaU.matToString(passF));
+
+		System.out.println("lCEDot="+JamaU.vecToString(passF));
 		// ajoute les influences des vitesses angulaires.
-		Matrix ang = getThetaDot(t);
 		// lDot
-		// Mono
-		for( int i=1; i<3; i++) {
-			for( int j=1; j<3; j++) {
-				_lSEDot.set(i-1, j-1, _hm.get(i-1,j-1) * ang.get(0,i-1) - passF.get(i-1,j-1));
-			}
-		}
-		// Bi
-		_lSEDot.set(2, 0, _hb.get(0,0)*ang.get(0,0) + _hb.get(0,1)*ang.get(0,1) - passF.get(2,0));
-		_lSEDot.set(2, 1, _hb.get(1,0)*ang.get(0,0) + _hb.get(1,1)*ang.get(0,1) - passF.get(2,1));
+		_lSEDot = thetaDot.times(_H);
+		_lSEDot.minusEquals(passF);
+		
 		// l
 		_lSE.plusEquals(_lSEDot.times(_dt));
-		System.out.println("_lSEDot="+JamaU.matToString(_lSEDot));
-		System.out.println("_lSE="+JamaU.matToString(_lSE));
+		System.out.println("_lSEDot="+JamaU.vecToString(_lSEDot));
+		System.out.println("_lSE="+JamaU.vecToString(_lSE));
 	}
 	/**
 	 * Calcule la force de contraction active à partir de _lSE.
 	 */
-	void activeForce(double t) {
-		for( int i=0; i < _FSE.getRowDimension(); i++) {
-			for (int j=0; j < _FSE.getColumnDimension(); j++ ) {
-				double val = Math.exp(_beta * _lSE.get(i, j)) - 1.0;
-				if (val >= 0.0) {
-					_FSE.set(i, j, val);
-				}
-				else {
-					_FSE.set(i, j, 0.0);
-				}
+	void activeForce(Matrix lSE) {
+		for (int col=0; col < _FSE.getColumnDimension(); col++ ) {
+			double val = Math.exp(_beta * _lSE.get(0, col)) - 1.0;
+			if (val >= 0.0) {
+				_FSE.set(0, col, val);
+			}
+			else {
+				_FSE.set(0, col, 0.0);
 			}
 		}
 	}
@@ -224,61 +215,37 @@ public class ArmKaladjian {
 	 * Calcule la force passive à partir de theta et thetaR.
 	 * @param angles des articulations
 	 */
-	public Matrix passiveForce(Matrix ang) {
-		//Matrix ang = getTheta(t);
+	public Matrix passiveForce(Matrix theta) {
 		// Calcul des forces passives
-		Matrix FP = new Matrix(3, 2, 0.0);
-		// Mono
-		for( int i=1; i<3; i++) {
-			for( int j=1; j<3; j++) {
-				double val = _hm.get(i-1,j-1) * (ang.get(0,i-1) - _thetaR[i-1]);
-				if (val >= 0.0) {
-					FP.set(i-1, j-1, val * _kPE * _ro.get(i-1, j-1));
-				}
-				else {
-					FP.set(i-1, j-1, 0.0);
-				}
+		Matrix FP = new Matrix(1, 6, 0.0);
+		Matrix ang = theta.minus(_thetaR);
+		
+		FP = ang.times(_H);
+		FP = FP.arrayTimes(_ro).times(_kPE);
+		// []+
+		for( int col=0; col<FP.getColumnDimension(); col++) {
+			double val = FP.get(0,  col);
+			if (val > 0.0) {
+				FP.set(0, col, val * _kPE * _ro.get(0, col));
+			}
+			else {
+				FP.set(0, col, 0.0);
 			}
 		}
-		// Bi
-		double val = _hb.get(0,0)*(ang.get(0,0) - _thetaR[0]) + _hb.get(0,1)* (ang.get(0,1) - _thetaR[1]);
-		if (val >= 0.0) {
-			FP.set(2, 0, val * _kPE * _ro.get(2,0));
-		}
-		else {
-			FP.set(2, 0, 0.0);
-		}
-		val = _hb.get(1,0)*(ang.get(0,0) - _thetaR[0]) + _hb.get(1,1)* (ang.get(0,1) - _thetaR[1]);
-		if (val >= 0.0) {
-			FP.set(2, 1, val * _kPE * _ro.get(2,1));
-		}
-		else {
-			FP.set(2, 1, 0.0);
-		}
-		
+			
 		return FP;
 	}
 	/**
 	 * Mise à jour du bras.
 	 */
-	void armUpdate( double t) {
+	void armUpdate( double t ) {
 		Matrix ang = getTheta( t - _dt);
 		Matrix angDot = getThetaDot( t - _dt);
 		computeI(ang);
 		computeC(ang, angDot);
 		
-		// Valeur de Torque
-		double t1 = -(_hm.get(0,0) * (_FSE.get(0, 0) + _FP.get(0, 0)) 
-				- _hm.get(0, 1) * (_FSE.get(0,1) + _FP.get(0,1)) ) 
-				- (_hb.get(0, 0) * (_FSE.get(2, 0) + _FP.get(2, 0)) 
-						- _hb.get(0, 1) * (_FSE.get(2, 1) + _FP.get(2, 1)) );
-		double t2 = -(_hm.get(1,0) * (_FSE.get(1, 0) + _FP.get(1, 0)) 
-				- _hm.get(1, 1) * (_FSE.get(1,1) + _FP.get(1,1)) ) 
-				- (_hb.get(1, 0) * (_FSE.get(2, 0) + _FP.get(2, 0)) 
-						- _hb.get(1, 1) * (_FSE.get(2, 1) + _FP.get(2, 1)) );
-		_T.set(0, 0, t1);
-		_T.set(0, 1, t2);
-		_TCT = _T.minus(_C.times(_T.transpose()));
+		_T = _H.times(_FSE.plus(_FP)).uminus();
+		_TCT = _T.minus(_C.times(ang.transpose()));
 		
 		Matrix angDotDot = (_I.inverse()).times(_TCT.transpose());
 		// Integration
@@ -291,28 +258,29 @@ public class ArmKaladjian {
 	 * A partir d'angles donnés, trouve les Forces de contractions
 	 * qui donne des couples nuls et tells que SUM(Fij) soit minimal.
 	 * 
-	 * @param ang Matrix 1x2
+	 * @param theta Matrix 1x2
 	 */
-	public Matrix findContractionLevel( Matrix ang ) {
+	public Matrix findContractionForce( Matrix theta ) {
 		// Matrix avec row FP et row FA
 		Matrix forceMat = new Matrix(2, 6, 0.0);
 		
 		// Calcul des forces passives and set as vec
-		Matrix FP = passiveForce(ang);
-//		System.out.println("FP="+JamaU.matToString(FP));
-		Matrix vFP = new Matrix( FP.getRowPackedCopy(), 1 /* 1 row */);
+		Matrix vFP = passiveForce(theta);
+		System.out.println("vFP="+JamaU.matToString(vFP));
+//		Matrix vFP = new Matrix( FP.getRowPackedCopy(), 1 /* 1 row */);
 //		System.out.println("vFP="+JamaU.vecToString(vFP));
 		
 		// Matrice des contraintes A
-		Matrix A = new Matrix(2, 6, 0.0);
-		A.set(0, 0, - _hm.get(0, 0));
-		A.set(0, 1, - _hm.get(0,  1));
-		A.set(0, 4, - _hb.get(0, 0));
-		A.set(0, 5, _hb.get(0, 1));
-		A.set(1, 2, - _hm.get(1, 0));
-		A.set(1, 3, - _hm.get(1,  1));
-		A.set(1, 4, _hb.get(1, 1));
-		A.set(1, 5, - _hb.get(1, 1));
+		Matrix A = _H.uminus();
+//		Matrix A = new Matrix(2, 6, 0.0);
+//		A.set(0, 0, - _hm.get(0, 0));
+//		A.set(0, 1, - _hm.get(0,  1));
+//		A.set(0, 4, - _hb.get(0, 0));
+//		A.set(0, 5, _hb.get(0, 1));
+//		A.set(1, 2, - _hm.get(1, 0));
+//		A.set(1, 3, - _hm.get(1,  1));
+//		A.set(1, 4, _hb.get(1, 1));
+//		A.set(1, 5, - _hb.get(1, 1));
 //		System.out.println("A="+JamaU.matToString(A));
 		
 		// Matrice b
@@ -350,6 +318,59 @@ public class ArmKaladjian {
 			// 2nd row reste nul
 			return forceMat;
 		}
+	}
+	/**
+	 * Compute Fa given Fa and Fp at minimum SUM(F),
+	 * with a proportionnal coef of 'k'.
+	 * => new.Fa = k x Fa + (k-1) x Fp
+	 * 
+	 * @param F Matrix 2x6 of {{Fa},{Fp}} (given by findContractionForce)
+ 	 * @param k proportionalite coef (>= 1).
+	 * @return Matrix 1x6 of lambda, as a command
+	 */
+	public Matrix getLambdaFromForce(Matrix F, double k, Matrix theta) {
+		System.out.println("F=\n"+JamaU.matToString(F));
+		// active force
+		Matrix Fp = F.getMatrix(0, 0, 0, F.getColumnDimension()-1);
+		Matrix Fa = F.getMatrix(1, 1, 0, F.getColumnDimension()-1);
+		
+		Fa.timesEquals(k);
+		Fa.plusEquals(Fp.times(k-1.0));
+		System.out.println("Fa="+JamaU.vecToString(Fa));
+		
+		// compute [E-lamba]+
+		for (int col = 0; col < Fa.getColumnDimension(); col++) {
+			if (Fa.get(0, col) > 0.0) {
+				Fa.set(0,  col,  (Math.log( (Fa.get(0, col)/_ro.get(0, col))+1.0  )) / _alpha);	
+			}
+			else {
+				Fa.set(0,  col, 0.0);
+			}
+			
+		}
+		System.out.println("[E-lambda]+ ="+JamaU.vecToString(Fa));
+		
+		// Reflexe input
+		// _E
+		Matrix Esr = theta.times(_H);
+		System.out.println("Esr="+JamaU.vecToString(Esr));
+		
+		// Command
+		Matrix com = new Matrix(1, 6, 0.0);
+		for (int col = 0; col < com.getColumnDimension(); col++) {
+			double val = Fa.get(0, col);
+			if (val >= 0) {
+				com.set(0, col, Esr.get(0,  col) - val);
+			}
+			else {
+				System.err.println("getLambdaFromForce : comment gérer quand c'est négatif ??");
+				System.err.println("Esr="+JamaU.vecToString(Esr));
+				System.exit(-1);
+			}
+		}
+		System.out.println("lambda="+JamaU.vecToString(com));
+		
+		return com;
 	}
 	
 	/**
@@ -410,22 +431,8 @@ public class ArmKaladjian {
 		_C.set(1, 1, 0.0);
 	}
 	
-	public static void main(String[] args) {
-		ArmKaladjian arm = new ArmKaladjian();
-		System.out.println(JamaU.matToString(arm._hm));
-		System.out.println("_m[0,0]="+arm._hm.get(0, 0));
-		
-//		Matrix lambda = new Matrix( new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
-//		System.out.println("*** Init *****************************");
-//		arm.init(Math.toRadians(25), Math.toRadians(35), 0.0, 0.0);
-//		System.out.println(arm.dumpMem());
-//		arm.actNij(lambda, 0.0);
-//		arm.muscleLength( 0.0);
-		
-		// Test de la recherche de contraction pour position donnée
-		Matrix theta = new Matrix( new double[][] {{Math.toRadians(25), Math.toRadians(35)}});
-		Matrix F = arm.findContractionLevel(theta);
-		
+	public double[] getLength() {
+		return _l;
 	}
 	
 	

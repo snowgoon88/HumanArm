@@ -4,7 +4,6 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Observable;
 
 import javax.vecmath.Point3d;
 
@@ -31,10 +30,10 @@ import Jama.Matrix;
  * 
  * @author Alain.Dutech@loria.fr
  */
-public class Arm extends Observable {
+public class Arm extends ArmModel {
 	
-	/** Dimension of the state space */
-	static int _dimQ = 2;
+//	/** Dimension of the state space */
+//	static int _dimQ = 2;
 	/** Position : 2 angles in rad */
 	Matrix _q = new Matrix(1, _dimQ);
 	/** Speed : 2 angular speed in rad/s */
@@ -46,8 +45,8 @@ public class Arm extends Observable {
 	
 	/** In euclidian space */
 	ArrayList<Point3d> _pos = new ArrayList<Point3d>();
-	double [] _posX = new double[_dimQ+1];
-	double [] _posY = new double[_dimQ+1];
+//	double [] _posX = new double[_dimQ+1];
+//	double [] _posY = new double[_dimQ+1];
 
 	/** Inertia Matrix */
 	Matrix _M = new Matrix(_dimQ,_dimQ);
@@ -60,8 +59,8 @@ public class Arm extends Observable {
 	double[] _I = {0.025, 0.045 };
 	/** Masses : kg */
 	double[] _m = {1.4, 1.1};
-	/** Length : m */
-	double[] _l = {0.30, 0.35};
+//	/** Length : m */
+//	double[] _l = {0.30, 0.35};
 	/** Distance to center of mass : m */
 	double[] _s = {0.11, 0.16};
 	/** Friction */
@@ -77,6 +76,8 @@ public class Arm extends Observable {
 	 */
 	public Arm() {
 		super();
+		// Length
+		_l = new double[] {0.30, 0.35};
 		// Default arm position;
 		_q = _q.times(0.0);
 		_dq = _dq.times(0.0);
@@ -356,69 +357,5 @@ public class Arm extends Observable {
 	public Matrix getTension() {
 		return _tau;
 	}
-	/**
-	 * Get the constraints apply on the arm (boundaries).
-	 * @return _contraints
-	 */
-	public ArmConstraints getConstraints() {
-		return _constraints;
-	}
-	/**
-	 * Change the arm constraints (boundaries).
-	 * @param constraints
-	 */
-	public void setConstraints(ArmConstraints constraints) {
-		this._constraints = constraints;
-	}
-
-	public double[] getLength() {
-		return _l;
-	}
-
-	/**
-	 * Test if a position (x,y) is reachable by the arm or not.
-	 * 
-	 * @param x the X-coordinate of the point to test
-	 * @param y the Y-coordinate of the point to test
-	 * @return true if the point is reachable, false if not.
-	 */
-	public boolean isPointReachable(double x, double y) {
-		final double l0_2 = _l[0] * _l[0];
-		final double l1_2 = _l[1] * _l[1];
-
-		// In Big cicle
-		double r = x * x + y * y;
-		if (r > (_l[0] + _l[1]) * (_l[0] + _l[1]))
-			return false;
-
-		// Out of the little circle, thanks Al-Kashi
-		double c_2 = l0_2 + l1_2 - 2 * _l[0] * _l[1]
-				* Math.cos(Math.PI - _constraints._maxq[1]);
-		if (r < c_2)
-			return false;
-
-		// In right circle
-		double p_x = _l[0] * Math.cos(_constraints._minq[0]);
-		double p_y = _l[0] * Math.sin(_constraints._minq[0]);
-		r = (x - p_x) * (x - p_x) + (y - p_y) * (y - p_y);
-		if (r < l1_2)
-			return false;
-
-		// In left circle
-		p_x = _l[0] * Math.cos(_constraints._maxq[0]);
-		p_y = _l[0] * Math.sin(_constraints._maxq[0]);
-		r = (x - p_x) * (x - p_x) + (y - p_y) * (y - p_y);
-		if (r < l1_2)
-			return true;
-
-		// In the range of (140:-30) degrees
-		// Compute the angle in polar coordinate system
-		double theta = Math.atan2(x, y);
-
-		if (theta > _constraints._maxq[0] && theta < _constraints._minq[0])
-			return false;
-
-		// Else in the figure
-		return true;
-	}
+	
 }
