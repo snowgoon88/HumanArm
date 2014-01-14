@@ -1,1 +1,12 @@
-/bin
+# What to ignore
+bin/
+build/
+dist/
+*.zip
+*.jar
+pyarm*
+*.class
+
+/.settings
+/.classpath
+
